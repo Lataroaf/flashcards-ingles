@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Flashcards Inglés</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f7;color:#1d1d1f;min-height:100vh}
+  #app{max-width:430px;margin:0 auto;padding:16px}
+  h1{font-size:20px;font-weight:600;text-align:center;margin-bottom:16px;color:#1d1d1f}
+  .tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .tab{padding:11px;font-size:14px;font-weight:500;border:1.5px solid #d1d1d6;border-radius:12px;background:#fff;color:#6e6e73;cursor:pointer}
+  .tab.active{background:#1d1d1f;color:#fff;border-color:#1d1d1f}
+  .scroll-row{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
+  .scroll-row::-webkit-scrollbar{display:none}
+  .pill{white-space:nowrap;padding:7px 14px;font-size:12px;font-weight:500;border:1.5px solid #d1d1d6;border-radius:20px;background:#fff;color:#6e6e73;cursor:pointer;flex-shrink:0}
+  .pill.active{background:#1d1d1f;color:#fff;border-color:#1d1d1f}
+  .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+  .stat{background:#fff;border-radius:12px;padding:10px;text-align:center;border:1px solid #e5e5ea}
+  .stat-n{font-size:24px;font-weight:600;color:#1d1d1f}
+  .stat-l{font-size:11px;color:#6e6e73;margin-top:2px}
+  .progress{width:100%;height:5px;background:#e5e5ea;border-radius:3px;margin-bottom:14px;overflow:hidden}
+  .progress-fill{height:100%;background:#1d1d1f;border-radius:3px;transition:width .3s}
+  .card{background:#fff;border-radius:20px;border:1px solid #e5e5ea;padding:32px 20px 24px;text-align:center;margin-bottom:14px;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .card-top{font-size:11px;color:#6e6e73;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .card-cat{font-size:11px;background:#f2f2f7;color:#6e6e73;padding:3px 10px;border-radius:10px;margin-bottom:10px;display:inline-block}
+  .card-word{font-size:38px;font-weight:600;color:#1d1d1f;margin-bottom:6px;line-height:1.1}
+  .card-hint{font-size:13px;color:#aeaeb2}
+  .result{font-size:14px;font-weight:500;margin-top:10px;padding:6px 16px;border-radius:10px;display:inline-block}
+  .ok{background:#d1f5e0;color:#1c7c3e}
+  .no{background:#ffe0e0;color:#c0392b}
+  .streak{text-align:center;font-size:13px;font-weight:500;color:#ff9500;background:#fff8e6;padding:5px 14px;border-radius:10px;margin-bottom:10px;display:inline-block}
+  .input-row{display:flex;gap:8px;margin-bottom:10px}
+  .input-row input{flex:1;padding:13px 14px;font-size:16px;border:1.5px solid #d1d1d6;border-radius:12px;background:#fff;color:#1d1d1f;outline:none;-webkit-appearance:none}
+  .input-row input:focus{border-color:#1d1d1f}
+  .btn{padding:13px 18px;font-size:15px;font-weight:500;border:1.5px solid #d1d1d6;border-radius:12px;background:#1d1d1f;color:#fff;cursor:pointer}
+  .btn-sec{width:100%;padding:11px;font-size:13px;color:#6e6e73;border:1.5px solid #d1d1d6;border-radius:12px;background:#fff;cursor:pointer;margin-bottom:6px}
+  .verb-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;justify-content:center}
+  .vbtn{padding:8px 13px;font-size:12px;font-weight:500;border:1.5px solid #d1d1d6;border-radius:10px;background:#fff;color:#6e6e73;cursor:pointer}
+  .vbtn.active{background:#1d1d1f;color:#fff;border-color:#1d1d1f}
+  #streak-wrap{text-align:center;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>Flashcards Inglés</h1>
+  <div class="tabs">
+    <button class="tab active" onclick="switchSection('vocab')">Vocabulario</button>
+    <button class="tab" onclick="switchSection('verbs')">Verbos</button>
+  </div>
+
+  <div id="section-vocab">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <button class="pill active" id="mode-en" onclick="setMode('en')" style="text-align:center">Inglés → Español</button>
+      <button class="pill" id="mode-es" onclick="setMode('es')" style="text-align:center">Español → Inglés</button>
+    </div>
+    <div class="scroll-row" id="cat-btns"></div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="v-c">0</div><div class="stat-l">Bien</div></div>
+      <div class="stat"><div class="stat-n" id="v-w">0</div><div class="stat-l">Error</div></div>
+      <div class="stat"><div class="stat-n" id="v-r">—</div><div class="stat-l">Quedan</div></div>
+    </div>
+    <div class="progress"><div class="progress-fill" id="v-prog" style="width:0%"></div></div>
+    <div id="streak-wrap"></div>
+    <div class="card">
+      <div class="card-top" id="v-badge">inglés</div>
+      <div class="card-cat" id="v-cat"></div>
+      <div class="card-word" id="v-word">—</div>
+      <div class="card-hint" id="v-hint">¿Cómo se dice en español?</div>
+      <div id="v-res"></div>
+    </div>
+    <div class="input-row">
+      <input id="v-in" type="text" placeholder="Tu respuesta..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+      <button class="btn" onclick="checkV()">OK</button>
+    </div>
+    <button class="btn-sec" onclick="skipV()">Saltar esta carta</button>
+  </div>
+
+  <div id="section-verbs" style="display:none">
+    <div class="verb-row">
+      <button class="vbtn active" id="vt-all" onclick="setVT('all')">Todos</button>
+      <button class="vbtn" id="vt-reg" onclick="setVT('regular')">Regulares</button>
+      <button class="vbtn" id="vt-irr" onclick="setVT('irregular')">Irregulares</button>
+    </div>
+    <div class="verb-row">
+      <button class="vbtn active" id="tn-past" onclick="setTense('past')">Pasado (V2)</button>
+      <button class="vbtn" id="tn-pp" onclick="setTense('pp')">Participio (V3)</button>
+      <button class="vbtn" id="tn-inf" onclick="setTense('inf')">Infinitivo</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="b-c">0</div><div class="stat-l">Bien</div></div>
+      <div class="stat"><div class="stat-n" id="b-w">0</div><div class="stat-l">Error</div></div>
+      <div class="stat"><div class="stat-n" id="b-r">—</div><div class="stat-l">Quedan</div></div>
+    </div>
+    <div class="progress"><div class="progress-fill" id="b-prog" style="width:0%"></div></div>
+    <div id="streak-wrap-b"></div>
+    <div class="card">
+      <div class="card-top" id="b-badge">verbo</div>
+      <div class="card-word" id="b-word">—</div>
+      <div class="card-hint" id="b-hint" style="font-size:12px;color:#aeaeb2;margin-top:8px"></div>
+      <div id="b-res"></div>
+    </div>
+    <div class="input-row">
+      <input id="b-in" type="text" placeholder="Tu respuesta..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+      <button class="btn" onclick="checkB()">OK</button>
+    </div>
+    <button class="btn-sec" onclick="skipB()">Saltar esta carta</button>
+  </div>
+</div>
+
+<script>
+const V=[
+  {en:'house',es:'casa',c:'Hogar'},{en:'apartment',es:'apartamento',c:'Hogar'},{en:'room',es:'habitación',c:'Hogar'},{en:'kitchen',es:'cocina',c:'Hogar'},{en:'bathroom',es:'baño',c:'Hogar'},{en:'bedroom',es:'dormitorio',c:'Hogar'},{en:'living room',es:'sala de estar',c:'Hogar'},{en:'window',es:'ventana',c:'Hogar'},{en:'door',es:'puerta',c:'Hogar'},{en:'table',es:'mesa',c:'Hogar'},{en:'chair',es:'silla',c:'Hogar'},{en:'bed',es:'cama',c:'Hogar'},{en:'sofa',es:'sofá',c:'Hogar'},{en:'lamp',es:'lámpara',c:'Hogar'},{en:'floor',es:'suelo',c:'Hogar'},{en:'ceiling',es:'techo',c:'Hogar'},{en:'wall',es:'pared',c:'Hogar'},{en:'stairs',es:'escaleras',c:'Hogar'},{en:'garden',es:'jardín',c:'Hogar'},{en:'garage',es:'garaje',c:'Hogar'},{en:'roof',es:'tejado',c:'Hogar'},{en:'balcony',es:'balcón',c:'Hogar'},{en:'shelf',es:'estantería',c:'Hogar'},{en:'mirror',es:'espejo',c:'Hogar'},{en:'curtain',es:'cortina',c:'Hogar'},
+  {en:'bread',es:'pan',c:'Comida'},{en:'milk',es:'leche',c:'Comida'},{en:'egg',es:'huevo',c:'Comida'},{en:'apple',es:'manzana',c:'Comida'},{en:'water',es:'agua',c:'Comida'},{en:'rice',es:'arroz',c:'Comida'},{en:'chicken',es:'pollo',c:'Comida'},{en:'fish',es:'pescado',c:'Comida'},{en:'meat',es:'carne',c:'Comida'},{en:'salad',es:'ensalada',c:'Comida'},{en:'soup',es:'sopa',c:'Comida'},{en:'cheese',es:'queso',c:'Comida'},{en:'butter',es:'mantequilla',c:'Comida'},{en:'sugar',es:'azúcar',c:'Comida'},{en:'salt',es:'sal',c:'Comida'},{en:'pepper',es:'pimienta',c:'Comida'},{en:'orange',es:'naranja',c:'Comida'},{en:'banana',es:'plátano',c:'Comida'},{en:'tomato',es:'tomate',c:'Comida'},{en:'potato',es:'patata',c:'Comida'},{en:'onion',es:'cebolla',c:'Comida'},{en:'garlic',es:'ajo',c:'Comida'},{en:'coffee',es:'café',c:'Comida'},{en:'tea',es:'té',c:'Comida'},{en:'juice',es:'zumo',c:'Comida'},{en:'wine',es:'vino',c:'Comida'},{en:'beer',es:'cerveza',c:'Comida'},{en:'cake',es:'pastel',c:'Comida'},{en:'cookie',es:'galleta',c:'Comida'},{en:'pasta',es:'pasta',c:'Comida'},
+  {en:'shirt',es:'camisa',c:'Ropa'},{en:'trousers',es:'pantalones',c:'Ropa'},{en:'dress',es:'vestido',c:'Ropa'},{en:'skirt',es:'falda',c:'Ropa'},{en:'jacket',es:'chaqueta',c:'Ropa'},{en:'coat',es:'abrigo',c:'Ropa'},{en:'shoes',es:'zapatos',c:'Ropa'},{en:'socks',es:'calcetines',c:'Ropa'},{en:'hat',es:'sombrero',c:'Ropa'},{en:'scarf',es:'bufanda',c:'Ropa'},{en:'gloves',es:'guantes',c:'Ropa'},{en:'sweater',es:'jersey',c:'Ropa'},{en:'boots',es:'botas',c:'Ropa'},{en:'jeans',es:'vaqueros',c:'Ropa'},{en:'tie',es:'corbata',c:'Ropa'},{en:'belt',es:'cinturón',c:'Ropa'},
+  {en:'head',es:'cabeza',c:'Cuerpo'},{en:'hand',es:'mano',c:'Cuerpo'},{en:'eye',es:'ojo',c:'Cuerpo'},{en:'mouth',es:'boca',c:'Cuerpo'},{en:'nose',es:'nariz',c:'Cuerpo'},{en:'ear',es:'oreja',c:'Cuerpo'},{en:'hair',es:'pelo',c:'Cuerpo'},{en:'neck',es:'cuello',c:'Cuerpo'},{en:'shoulder',es:'hombro',c:'Cuerpo'},{en:'arm',es:'brazo',c:'Cuerpo'},{en:'leg',es:'pierna',c:'Cuerpo'},{en:'foot',es:'pie',c:'Cuerpo'},{en:'finger',es:'dedo',c:'Cuerpo'},{en:'back',es:'espalda',c:'Cuerpo'},{en:'chest',es:'pecho',c:'Cuerpo'},{en:'stomach',es:'estómago',c:'Cuerpo'},{en:'heart',es:'corazón',c:'Cuerpo'},{en:'knee',es:'rodilla',c:'Cuerpo'},{en:'tooth',es:'diente',c:'Cuerpo'},{en:'lip',es:'labio',c:'Cuerpo'},
+  {en:'sun',es:'sol',c:'Naturaleza'},{en:'moon',es:'luna',c:'Naturaleza'},{en:'sky',es:'cielo',c:'Naturaleza'},{en:'rain',es:'lluvia',c:'Naturaleza'},{en:'snow',es:'nieve',c:'Naturaleza'},{en:'wind',es:'viento',c:'Naturaleza'},{en:'cloud',es:'nube',c:'Naturaleza'},{en:'tree',es:'árbol',c:'Naturaleza'},{en:'flower',es:'flor',c:'Naturaleza'},{en:'river',es:'río',c:'Naturaleza'},{en:'sea',es:'mar',c:'Naturaleza'},{en:'mountain',es:'montaña',c:'Naturaleza'},{en:'forest',es:'bosque',c:'Naturaleza'},{en:'beach',es:'playa',c:'Naturaleza'},{en:'stone',es:'piedra',c:'Naturaleza'},{en:'fire',es:'fuego',c:'Naturaleza'},{en:'ice',es:'hielo',c:'Naturaleza'},{en:'earth',es:'tierra',c:'Naturaleza'},{en:'star',es:'estrella',c:'Naturaleza'},{en:'lake',es:'lago',c:'Naturaleza'},{en:'island',es:'isla',c:'Naturaleza'},{en:'desert',es:'desierto',c:'Naturaleza'},{en:'storm',es:'tormenta',c:'Naturaleza'},
+  {en:'dog',es:'perro',c:'Animales'},{en:'cat',es:'gato',c:'Animales'},{en:'bird',es:'pájaro',c:'Animales'},{en:'horse',es:'caballo',c:'Animales'},{en:'cow',es:'vaca',c:'Animales'},{en:'pig',es:'cerdo',c:'Animales'},{en:'sheep',es:'oveja',c:'Animales'},{en:'rabbit',es:'conejo',c:'Animales'},{en:'lion',es:'león',c:'Animales'},{en:'tiger',es:'tigre',c:'Animales'},{en:'elephant',es:'elefante',c:'Animales'},{en:'bear',es:'oso',c:'Animales'},{en:'wolf',es:'lobo',c:'Animales'},{en:'fox',es:'zorro',c:'Animales'},{en:'eagle',es:'águila',c:'Animales'},{en:'snake',es:'serpiente',c:'Animales'},{en:'dolphin',es:'delfín',c:'Animales'},{en:'whale',es:'ballena',c:'Animales'},{en:'monkey',es:'mono',c:'Animales'},{en:'deer',es:'ciervo',c:'Animales'},
+  {en:'street',es:'calle',c:'Ciudad'},{en:'road',es:'carretera',c:'Ciudad'},{en:'bridge',es:'puente',c:'Ciudad'},{en:'park',es:'parque',c:'Ciudad'},{en:'hospital',es:'hospital',c:'Ciudad'},{en:'school',es:'escuela',c:'Ciudad'},{en:'church',es:'iglesia',c:'Ciudad'},{en:'shop',es:'tienda',c:'Ciudad'},{en:'market',es:'mercado',c:'Ciudad'},{en:'bank',es:'banco',c:'Ciudad'},{en:'hotel',es:'hotel',c:'Ciudad'},{en:'restaurant',es:'restaurante',c:'Ciudad'},{en:'museum',es:'museo',c:'Ciudad'},{en:'library',es:'biblioteca',c:'Ciudad'},{en:'airport',es:'aeropuerto',c:'Ciudad'},{en:'station',es:'estación',c:'Ciudad'},{en:'pharmacy',es:'farmacia',c:'Ciudad'},{en:'gym',es:'gimnasio',c:'Ciudad'},{en:'cinema',es:'cine',c:'Ciudad'},{en:'square',es:'plaza',c:'Ciudad'},
+  {en:'doctor',es:'médico',c:'Trabajos'},{en:'nurse',es:'enfermero',c:'Trabajos'},{en:'teacher',es:'profesor',c:'Trabajos'},{en:'engineer',es:'ingeniero',c:'Trabajos'},{en:'lawyer',es:'abogado',c:'Trabajos'},{en:'architect',es:'arquitecto',c:'Trabajos'},{en:'chef',es:'cocinero',c:'Trabajos'},{en:'waiter',es:'camarero',c:'Trabajos'},{en:'driver',es:'conductor',c:'Trabajos'},{en:'pilot',es:'piloto',c:'Trabajos'},{en:'firefighter',es:'bombero',c:'Trabajos'},{en:'police officer',es:'policía',c:'Trabajos'},{en:'mechanic',es:'mecánico',c:'Trabajos'},{en:'electrician',es:'electricista',c:'Trabajos'},{en:'plumber',es:'fontanero',c:'Trabajos'},{en:'carpenter',es:'carpintero',c:'Trabajos'},{en:'farmer',es:'agricultor',c:'Trabajos'},{en:'journalist',es:'periodista',c:'Trabajos'},{en:'programmer',es:'programador',c:'Trabajos'},{en:'accountant',es:'contable',c:'Trabajos'},{en:'designer',es:'diseñador',c:'Trabajos'},{en:'dentist',es:'dentista',c:'Trabajos'},{en:'pharmacist',es:'farmacéutico',c:'Trabajos'},{en:'cleaner',es:'limpiador',c:'Trabajos'},{en:'delivery person',es:'repartidor',c:'Trabajos'},
+  {en:'dawn',es:'amanecer',c:'Tiempo del día'},{en:'sunrise',es:'salida del sol',c:'Tiempo del día'},{en:'morning',es:'mañana',c:'Tiempo del día'},{en:'midday',es:'mediodía',c:'Tiempo del día'},{en:'afternoon',es:'tarde',c:'Tiempo del día'},{en:'sunset',es:'atardecer',c:'Tiempo del día'},{en:'dusk',es:'anochecer',c:'Tiempo del día'},{en:'evening',es:'primera noche',c:'Tiempo del día'},{en:'night',es:'noche',c:'Tiempo del día'},{en:'midnight',es:'medianoche',c:'Tiempo del día'},{en:'early morning',es:'madrugada',c:'Tiempo del día'},{en:'daytime',es:'de día',c:'Tiempo del día'},{en:'nighttime',es:'de noche',c:'Tiempo del día'},{en:'bedtime',es:'hora de dormir',c:'Tiempo del día'},{en:'lunchtime',es:'hora de comer',c:'Tiempo del día'},{en:'rush hour',es:'hora punta',c:'Tiempo del día'},{en:'weekend',es:'fin de semana',c:'Tiempo del día'},{en:'weekday',es:'día laborable',c:'Tiempo del día'},
+  {en:'wake up',es:'despertarse',c:'Rutina'},{en:'shower',es:'ducha',c:'Rutina'},{en:'breakfast',es:'desayuno',c:'Rutina'},{en:'lunch',es:'almuerzo',c:'Rutina'},{en:'dinner',es:'cena',c:'Rutina'},{en:'commute',es:'desplazamiento',c:'Rutina'},{en:'meeting',es:'reunión',c:'Rutina'},{en:'appointment',es:'cita',c:'Rutina'},{en:'errand',es:'recado',c:'Rutina'},{en:'grocery shopping',es:'hacer la compra',c:'Rutina'},{en:'laundry',es:'colada',c:'Rutina'},{en:'nap',es:'siesta',c:'Rutina'},{en:'exercise',es:'ejercicio',c:'Rutina'},{en:'homework',es:'deberes',c:'Rutina'},
+  {en:'mother',es:'madre',c:'Familia'},{en:'father',es:'padre',c:'Familia'},{en:'brother',es:'hermano',c:'Familia'},{en:'sister',es:'hermana',c:'Familia'},{en:'grandmother',es:'abuela',c:'Familia'},{en:'grandfather',es:'abuelo',c:'Familia'},{en:'uncle',es:'tío',c:'Familia'},{en:'aunt',es:'tía',c:'Familia'},{en:'cousin',es:'primo',c:'Familia'},{en:'husband',es:'marido',c:'Familia'},{en:'wife',es:'esposa',c:'Familia'},{en:'son',es:'hijo',c:'Familia'},{en:'daughter',es:'hija',c:'Familia'},{en:'baby',es:'bebé',c:'Familia'},
+  {en:'car',es:'coche',c:'Transporte'},{en:'bus',es:'autobús',c:'Transporte'},{en:'train',es:'tren',c:'Transporte'},{en:'plane',es:'avión',c:'Transporte'},{en:'boat',es:'barco',c:'Transporte'},{en:'bicycle',es:'bicicleta',c:'Transporte'},{en:'motorcycle',es:'moto',c:'Transporte'},{en:'taxi',es:'taxi',c:'Transporte'},{en:'subway',es:'metro',c:'Transporte'},{en:'ticket',es:'billete',c:'Transporte'},{en:'traffic',es:'tráfico',c:'Transporte'},{en:'journey',es:'viaje',c:'Transporte'},
+  {en:'happy',es:'feliz',c:'Emociones'},{en:'sad',es:'triste',c:'Emociones'},{en:'angry',es:'enfadado',c:'Emociones'},{en:'scared',es:'asustado',c:'Emociones'},{en:'tired',es:'cansado',c:'Emociones'},{en:'bored',es:'aburrido',c:'Emociones'},{en:'excited',es:'emocionado',c:'Emociones'},{en:'nervous',es:'nervioso',c:'Emociones'},{en:'proud',es:'orgulloso',c:'Emociones'},{en:'lonely',es:'solo',c:'Emociones'},{en:'confused',es:'confundido',c:'Emociones'},{en:'grateful',es:'agradecido',c:'Emociones'},{en:'anxious',es:'ansioso',c:'Emociones'},{en:'relaxed',es:'relajado',c:'Emociones'},{en:'calm',es:'tranquilo',c:'Emociones'},
+  {en:'phone',es:'teléfono',c:'Tecnología'},{en:'computer',es:'ordenador',c:'Tecnología'},{en:'screen',es:'pantalla',c:'Tecnología'},{en:'keyboard',es:'teclado',c:'Tecnología'},{en:'battery',es:'batería',c:'Tecnología'},{en:'charger',es:'cargador',c:'Tecnología'},{en:'camera',es:'cámara',c:'Tecnología'},{en:'headphones',es:'auriculares',c:'Tecnología'},{en:'internet',es:'internet',c:'Tecnología'},{en:'password',es:'contraseña',c:'Tecnología'},{en:'app',es:'aplicación',c:'Tecnología'},{en:'email',es:'correo electrónico',c:'Tecnología'},{en:'message',es:'mensaje',c:'Tecnología'},
+  {en:'red',es:'rojo',c:'Colores'},{en:'blue',es:'azul',c:'Colores'},{en:'green',es:'verde',c:'Colores'},{en:'yellow',es:'amarillo',c:'Colores'},{en:'orange',es:'naranja',c:'Colores'},{en:'purple',es:'morado',c:'Colores'},{en:'pink',es:'rosa',c:'Colores'},{en:'black',es:'negro',c:'Colores'},{en:'white',es:'blanco',c:'Colores'},{en:'grey',es:'gris',c:'Colores'},{en:'brown',es:'marrón',c:'Colores'},{en:'gold',es:'dorado',c:'Colores'},
+  {en:'Monday',es:'lunes',c:'Días y meses'},{en:'Tuesday',es:'martes',c:'Días y meses'},{en:'Wednesday',es:'miércoles',c:'Días y meses'},{en:'Thursday',es:'jueves',c:'Días y meses'},{en:'Friday',es:'viernes',c:'Días y meses'},{en:'Saturday',es:'sábado',c:'Días y meses'},{en:'Sunday',es:'domingo',c:'Días y meses'},{en:'January',es:'enero',c:'Días y meses'},{en:'February',es:'febrero',c:'Días y meses'},{en:'March',es:'marzo',c:'Días y meses'},{en:'April',es:'abril',c:'Días y meses'},{en:'May',es:'mayo',c:'Días y meses'},{en:'June',es:'junio',c:'Días y meses'},{en:'July',es:'julio',c:'Días y meses'},{en:'August',es:'agosto',c:'Días y meses'},{en:'September',es:'septiembre',c:'Días y meses'},{en:'October',es:'octubre',c:'Días y meses'},{en:'November',es:'noviembre',c:'Días y meses'},{en:'December',es:'diciembre',c:'Días y meses'},{en:'yesterday',es:'ayer',c:'Días y meses'},{en:'today',es:'hoy',c:'Días y meses'},{en:'tomorrow',es:'mañana',c:'Días y meses'},
+];
+
+const B=[
+  {i:'be',p:'was/were',pp:'been',es:'ser/estar',t:'irregular'},
+  {i:'have',p:'had',pp:'had',es:'tener',t:'irregular'},
+  {i:'do',p:'did',pp:'done',es:'hacer',t:'irregular'},
+  {i:'go',p:'went',pp:'gone',es:'ir',t:'irregular'},
+  {i:'say',p:'said',pp:'said',es:'decir',t:'irregular'},
+  {i:'get',p:'got',pp:'got/gotten',es:'obtener',t:'irregular'},
+  {i:'make',p:'made',pp:'made',es:'hacer/crear',t:'irregular'},
+  {i:'know',p:'knew',pp:'known',es:'saber/conocer',t:'irregular'},
+  {i:'think',p:'thought',pp:'thought',es:'pensar',t:'irregular'},
+  {i:'take',p:'took',pp:'taken',es:'tomar',t:'irregular'},
+  {i:'see',p:'saw',pp:'seen',es:'ver',t:'irregular'},
+  {i:'come',p:'came',pp:'come',es:'venir',t:'irregular'},
+  {i:'give',p:'gave',pp:'given',es:'dar',t:'irregular'},
+  {i:'find',p:'found',pp:'found',es:'encontrar',t:'irregular'},
+  {i:'buy',p:'bought',pp:'bought',es:'comprar',t:'irregular'},
+  {i:'write',p:'wrote',pp:'written',es:'escribir',t:'irregular'},
+  {i:'speak',p:'spoke',pp:'spoken',es:'hablar',t:'irregular'},
+  {i:'run',p:'ran',pp:'run',es:'correr',t:'irregular'},
+  {i:'eat',p:'ate',pp:'eaten',es:'comer',t:'irregular'},
+  {i:'drink',p:'drank',pp:'drunk',es:'beber',t:'irregular'},
+  {i:'sleep',p:'slept',pp:'slept',es:'dormir',t:'irregular'},
+  {i:'leave',p:'left',pp:'left',es:'salir/dejar',t:'irregular'},
+  {i:'feel',p:'felt',pp:'felt',es:'sentir',t:'irregular'},
+  {i:'keep',p:'kept',pp:'kept',es:'mantener',t:'irregular'},
+  {i:'begin',p:'began',pp:'begun',es:'empezar',t:'irregular'},
+  {i:'lose',p:'lost',pp:'lost',es:'perder',t:'irregular'},
+  {i:'pay',p:'paid',pp:'paid',es:'pagar',t:'irregular'},
+  {i:'send',p:'sent',pp:'sent',es:'enviar',t:'irregular'},
+  {i:'break',p:'broke',pp:'broken',es:'romper',t:'irregular'},
+  {i:'bring',p:'brought',pp:'brought',es:'traer',t:'irregular'},
+  {i:'catch',p:'caught',pp:'caught',es:'atrapar',t:'irregular'},
+  {i:'teach',p:'taught',pp:'taught',es:'enseñar',t:'irregular'},
+  {i:'tell',p:'told',pp:'told',es:'contar',t:'irregular'},
+  {i:'sell',p:'sold',pp:'sold',es:'vender',t:'irregular'},
+  {i:'fall',p:'fell',pp:'fallen',es:'caer',t:'irregular'},
+  {i:'grow',p:'grew',pp:'grown',es:'crecer',t:'irregular'},
+  {i:'fly',p:'flew',pp:'flown',es:'volar',t:'irregular'},
+  {i:'drive',p:'drove',pp:'driven',es:'conducir',t:'irregular'},
+  {i:'win',p:'won',pp:'won',es:'ganar',t:'irregular'},
+  {i:'understand',p:'understood',pp:'understood',es:'entender',t:'irregular'},
+  {i:'forget',p:'forgot',pp:'forgotten',es:'olvidar',t:'irregular'},
+  {i:'choose',p:'chose',pp:'chosen',es:'elegir',t:'irregular'},
+  {i:'swim',p:'swam',pp:'swum',es:'nadar',t:'irregular'},
+  {i:'wear',p:'wore',pp:'worn',es:'llevar puesto',t:'irregular'},
+  {i:'read',p:'read',pp:'read',es:'leer',t:'irregular'},
+  {i:'work',p:'worked',pp:'worked',es:'trabajar',t:'regular'},
+  {i:'play',p:'played',pp:'played',es:'jugar',t:'regular'},
+  {i:'walk',p:'walked',pp:'walked',es:'caminar',t:'regular'},
+  {i:'talk',p:'talked',pp:'talked',es:'charlar',t:'regular'},
+  {i:'watch',p:'watched',pp:'watched',es:'mirar',t:'regular'},
+  {i:'listen',p:'listened',pp:'listened',es:'escuchar',t:'regular'},
+  {i:'open',p:'opened',pp:'opened',es:'abrir',t:'regular'},
+  {i:'close',p:'closed',pp:'closed',es:'cerrar',t:'regular'},
+  {i:'start',p:'started',pp:'started',es:'empezar',t:'regular'},
+  {i:'finish',p:'finished',pp:'finished',es:'terminar',t:'regular'},
+  {i:'love',p:'loved',pp:'loved',es:'amar',t:'regular'},
+  {i:'help',p:'helped',pp:'helped',es:'ayudar',t:'regular'},
+  {i:'cook',p:'cooked',pp:'cooked',es:'cocinar',t:'regular'},
+  {i:'clean',p:'cleaned',pp:'cleaned',es:'limpiar',t:'regular'},
+  {i:'call',p:'called',pp:'called',es:'llamar',t:'regular'},
+  {i:'ask',p:'asked',pp:'asked',es:'preguntar',t:'regular'},
+  {i:'try',p:'tried',pp:'tried',es:'intentar',t:'regular'},
+  {i:'stop',p:'stopped',pp:'stopped',es:'parar',t:'regular'},
+  {i:'move',p:'moved',pp:'moved',es:'moverse',t:'regular'},
+  {i:'wait',p:'waited',pp:'waited',es:'esperar',t:'regular'},
+  {i:'learn',p:'learned',pp:'learned',es:'aprender',t:'regular'},
+  {i:'study',p:'studied',pp:'studied',es:'estudiar',t:'regular'},
+  {i:'travel',p:'traveled',pp:'traveled',es:'viajar',t:'regular'},
+  {i:'need',p:'needed',pp:'needed',es:'necesitar',t:'regular'},
+  {i:'want',p:'wanted',pp:'wanted',es:'querer',t:'regular'},
+  {i:'like',p:'liked',pp:'liked',es:'gustar',t:'regular'},
+  {i:'decide',p:'decided',pp:'decided',es:'decidir',t:'regular'},
+  {i:'change',p:'changed',pp:'changed',es:'cambiar',t:'regular'},
+  {i:'live',p:'lived',pp:'lived',es:'vivir',t:'regular'},
+  {i:'smile',p:'smiled',pp:'smiled',es:'sonreír',t:'regular'},
+  {i:'laugh',p:'laughed',pp:'laughed',es:'reír',t:'regular'},
+  {i:'cry',p:'cried',pp:'cried',es:'llorar',t:'regular'},
+  {i:'dance',p:'danced',pp:'danced',es:'bailar',t:'regular'},
+];
+
+const cats=['Todas',...new Set(V.map(w=>w.c))];
+let selCat='Todas', vMode='en';
+let vQ=[],vRev=[],vC=0,vW=0,vStr=0,vTot=0,vCur=null,vShowing=false;
+let bType='all',bTense='past';
+let bQ=[],bRev=[],bC=0,bW=0,bStr=0,bTot=0,bCur=null,bShowing=false;
+
+function shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function norm(s){return s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+
+function buildCats(){
+  document.getElementById('cat-btns').innerHTML=cats.map(c=>
+    `<button class="pill${c===selCat?' active':''}" onclick="setCat('${c}')">${c}</button>`
+  ).join('');
+}
+function setCat(c){selCat=c;buildCats();initV()}
+
+function getPool(){return selCat==='Todas'?V:V.filter(w=>w.c===selCat)}
+
+function initV(){
+  vQ=shuf([...getPool()]);vRev=[];vC=0;vW=0;vStr=0;vTot=vQ.length;
+  updV();nextV();
+}
+function setMode(m){
+  vMode=m;
+  document.getElementById('mode-en').classList.toggle('active',m==='en');
+  document.getElementById('mode-es').classList.toggle('active',m==='es');
+  initV();
+}
+function nextV(){
+  if(vRev.length>0&&(vQ.length===0||Math.random()<0.3)){vCur=vRev.shift();}
+  else if(vQ.length>0){vCur=vQ.shift();if(vRev.length>0)shuf(vRev);}
+  else{
+    vCur=null;
+    document.getElementById('v-word').textContent='¡Completado!';
+    document.getElementById('v-badge').textContent='';
+    document.getElementById('v-cat').textContent='';
+    document.getElementById('v-hint').textContent='Repasaste todas las palabras';
+    document.getElementById('v-res').innerHTML='';return;
+  }
+  document.getElementById('v-badge').textContent=vMode==='en'?'inglés':'español';
+  document.getElementById('v-cat').textContent=vCur.c;
+  document.getElementById('v-word').textContent=vMode==='en'?vCur.en:vCur.es;
+  document.getElementById('v-hint').textContent=vMode==='en'?'¿Cómo se dice en español?':'¿Cómo se dice en inglés?';
+  document.getElementById('v-res').innerHTML='';
+  document.getElementById('v-in').value='';
+  document.getElementById('v-in').focus();
+  vShowing=false;updV();
+}
+function checkV(){
+  if(vShowing){nextV();return;}
+  const inp=document.getElementById('v-in').value;
+  if(!inp.trim()||!vCur)return;
+  const exp=vMode==='en'?vCur.es:vCur.en;
+  const alts=exp.split('/').map(norm);
+  const ok=alts.some(a=>norm(inp)===a);
+  if(ok){vC++;vStr++;document.getElementById('v-res').innerHTML='<span class="result ok">Correcto</span>';}
+  else{vW++;vStr=0;vRev.push(vCur);document.getElementById('v-res').innerHTML=`<span class="result no">Era: ${exp}</span>`;}
+  updV();vShowing=true;setTimeout(nextV,1400);
+}
+function skipV(){if(!vCur)return;vRev.push(vCur);nextV();}
+function updV(){
+  document.getElementById('v-c').textContent=vC;
+  document.getElementById('v-w').textContent=vW;
+  document.getElementById('v-r').textContent=vQ.length+vRev.length;
+  document.getElementById('v-prog').style.width=(vTot>0?Math.round(vC/vTot*100):0)+'%';
+  document.getElementById('streak-wrap').innerHTML=vStr>=3?`<span class="streak">Racha: ${vStr}</span>`:'';
+}
+
+function initB(){
+  const pool=bType==='all'?B:B.filter(v=>v.t===bType);
+  bQ=shuf([...pool]);bRev=[];bC=0;bW=0;bStr=0;bTot=bQ.length;
+  updB();nextB();
+}
+function setVT(t){
+  bType=t;
+  ['all','reg','irr'].forEach(x=>document.getElementById('vt-'+x).classList.toggle('active',
+    (x==='all'&&t==='all')||(x==='reg'&&t==='regular')||(x==='irr'&&t==='irregular')));
+  initB();
+}
+function setTense(t){
+  bTense=t;
+  ['past','pp','inf'].forEach(x=>document.getElementById('tn-'+x).classList.toggle('active',x===t));
+  initB();
+}
+function nextB(){
+  let v;
+  if(bRev.length>0&&(bQ.length===0||Math.random()<0.3)){v=bRev.shift();}
+  else if(bQ.length>0){v=bQ.shift();if(bRev.length>0)shuf(bRev);}
+  else{
+    bCur=null;
+    document.getElementById('b-word').textContent='¡Completado!';
+    document.getElementById('b-badge').textContent='';
+    document.getElementById('b-hint').textContent='Repasaste todos los verbos';
+    document.getElementById('b-res').innerHTML='';return;
+  }
+  bCur=v;
+  let prompt,hint;
+  if(bTense==='past'){prompt=v.i;hint=`Pasado de "${v.i}" · ${v.es} · ${v.t==='irregular'?'irregular':'regular: añade -ed'}`;}
+  else if(bTense==='pp'){prompt=v.i;hint=`Participio de "${v.i}" · ${v.es}`;}
+  else{prompt=v.p;hint=`Infinitivo · pasado: ${v.p} · ${v.es}`;}
+  document.getElementById('b-badge').textContent=v.t;
+  document.getElementById('b-word').textContent=prompt;
+  document.getElementById('b-hint').textContent=hint;
+  document.getElementById('b-res').innerHTML='';
+  document.getElementById('b-in').value='';
+  document.getElementById('b-in').focus();
+  bShowing=false;updB();
+}
+function checkB(){
+  if(bShowing){nextB();return;}
+  const inp=document.getElementById('b-in').value;
+  if(!inp.trim()||!bCur)return;
+  let exp=bTense==='past'?bCur.p:bTense==='pp'?bCur.pp:bCur.i;
+  const alts=exp.split('/').map(norm);
+  const ok=alts.some(a=>norm(inp)===a);
+  if(ok){bC++;bStr++;document.getElementById('b-res').innerHTML='<span class="result ok">Correcto</span>';}
+  else{bW++;bStr=0;bRev.push(bCur);document.getElementById('b-res').innerHTML=`<span class="result no">Era: ${exp}</span>`;}
+  updB();bShowing=true;setTimeout(nextB,1400);
+}
+function skipB(){if(!bCur)return;bRev.push(bCur);nextB();}
+function updB(){
+  document.getElementById('b-c').textContent=bC;
+  document.getElementById('b-w').textContent=bW;
+  document.getElementById('b-r').textContent=bQ.length+bRev.length;
+  document.getElementById('b-prog').style.width=(bTot>0?Math.round(bC/bTot*100):0)+'%';
+  document.getElementById('streak-wrap-b').innerHTML=bStr>=3?`<span class="streak">Racha: ${bStr}</span>`:'';
+}
+function switchSection(s){
+  document.getElementById('section-vocab').style.display=s==='vocab'?'':'none';
+  document.getElementById('section-verbs').style.display=s==='verbs'?'':'none';
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&s==='vocab')||(i===1&&s==='verbs')));
+  if(s==='verbs'&&bTot===0)initB();
+}
+document.getElementById('v-in').addEventListener('keydown',e=>{if(e.key==='Enter')checkV()});
+document.getElementById('b-in').addEventListener('keydown',e=>{if(e.key==='Enter')checkB()});
+buildCats();initV();
+</script>
+</body>
+</html>
