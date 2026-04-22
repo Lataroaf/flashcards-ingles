@@ -925,7 +925,28 @@ let learnedSet=new Set(); // words answered correctly at least once
 
 // ── HELPERS ──────────────────────────────────────────────────
 function shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function norm(s){return s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function norm(s){
+  return s.trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[¿¡?!.,;:\'"()]/g,'')
+    .replace(/\s+/g,' ').trim();
+}
+function isMatch(input, answers){
+  const ni=norm(input);
+  if(!ni)return false;
+  for(const a of answers){
+    const na=norm(a);
+    if(ni===na)return true;
+    // accept if input matches any individual meaning separated by / or comma
+    const parts=na.split(/[\/,]/).map(p=>p.trim()).filter(Boolean);
+    if(parts.some(p=>ni===p))return true;
+    // accept if all words of input appear in answer (partial phrase match)
+    const inputWords=ni.split(' ').filter(w=>w.length>2);
+    const answerWords=na.split(' ');
+    if(inputWords.length>=2 && inputWords.every(w=>answerWords.some(aw=>aw.startsWith(w))))return true;
+  }
+  return false;
+}
 function $(id){return document.getElementById(id)}
 
 function speak(text){
@@ -1039,10 +1060,10 @@ function checkAnswer(){
   let ok=false;
   if(section==='vocab'){
     const alts=vMode==='en'?current.es:[current.en];
-    ok=alts.some(a=>norm(inp)===norm(a));
+    ok=isMatch(inp, alts);
   } else {
     let exp=bTense==='past'?current.p:bTense==='pp'?current.pp:current.i;
-    ok=exp.split('/').some(a=>norm(inp)===norm(a));
+    ok=isMatch(inp, exp.split('/'));
   }
   if(ok){
     correct++;streak++;
