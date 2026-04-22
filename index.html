@@ -4,175 +4,678 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Flashcards Inglés</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f7;color:#1d1d1f;min-height:100vh}
-#app{max-width:430px;margin:0 auto;padding:16px 16px 32px}
-h1{font-size:20px;font-weight:600;text-align:center;margin-bottom:16px;color:#1d1d1f}
-.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-.tab{padding:11px;font-size:14px;font-weight:500;border:1.5px solid #d1d1d6;border-radius:12px;background:#fff;color:#6e6e73;cursor:pointer;transition:all .15s}
+#app{max-width:430px;margin:0 auto;padding:12px 14px 32px}
+
+/* TOP BAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.topbar h1{font-size:17px;font-weight:600}
+.topbar-right{display:flex;gap:8px;align-items:center}
+.learned-badge{font-size:12px;font-weight:500;background:#1d1d1f;color:#fff;padding:4px 10px;border-radius:20px}
+.menu-btn{background:#fff;border:1.5px solid #d1d1d6;border-radius:10px;padding:6px 10px;font-size:13px;color:#1d1d1f;cursor:pointer}
+
+/* COLLAPSIBLE MENU */
+#menu-panel{background:#fff;border:1px solid #e5e5ea;border-radius:16px;padding:14px;margin-bottom:12px;display:none}
+#menu-panel.open{display:block}
+.menu-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.tab{padding:9px;font-size:13px;font-weight:500;border:1.5px solid #d1d1d6;border-radius:10px;background:#f5f5f7;color:#6e6e73;cursor:pointer}
 .tab.active{background:#1d1d1f;color:#fff;border-color:#1d1d1f}
-.scroll-row{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
+.menu-section{margin-bottom:10px}
+.menu-label{font-size:11px;color:#aeaeb2;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.scroll-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .scroll-row::-webkit-scrollbar{display:none}
-.pill{white-space:nowrap;padding:7px 14px;font-size:12px;font-weight:500;border:1.5px solid #d1d1d6;border-radius:20px;background:#fff;color:#6e6e73;cursor:pointer;flex-shrink:0;transition:all .15s}
+.pill{white-space:nowrap;padding:6px 12px;font-size:12px;font-weight:500;border:1.5px solid #d1d1d6;border-radius:20px;background:#f5f5f7;color:#6e6e73;cursor:pointer;flex-shrink:0}
 .pill.active{background:#1d1d1f;color:#fff;border-color:#1d1d1f}
-.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
-.stat{background:#fff;border-radius:12px;padding:10px;text-align:center;border:1px solid #e5e5ea}
-.stat-n{font-size:24px;font-weight:600;color:#1d1d1f}
-.stat-l{font-size:11px;color:#6e6e73;margin-top:2px}
-.progress{width:100%;height:5px;background:#e5e5ea;border-radius:3px;margin-bottom:14px;overflow:hidden}
+.verb-row{display:flex;gap:6px;flex-wrap:wrap}
+.vbtn{padding:6px 12px;font-size:12px;font-weight:500;border:1.5px solid #d1d1d6;border-radius:10px;background:#f5f5f7;color:#6e6e73;cursor:pointer}
+.vbtn.active{background:#1d1d1f;color:#fff;border-color:#1d1d1f}
+
+/* VERB RULE BOX */
+.rule-box{background:#f5f5f7;border-radius:10px;padding:10px 12px;font-size:12px;color:#3a3a3a;line-height:1.5;margin-top:8px}
+.rule-box strong{font-weight:600;color:#1d1d1f}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:10px}
+.stat{background:#fff;border-radius:10px;padding:8px 4px;text-align:center;border:1px solid #e5e5ea}
+.stat-n{font-size:20px;font-weight:600;color:#1d1d1f}
+.stat-l{font-size:10px;color:#6e6e73;margin-top:1px}
+.progress{width:100%;height:4px;background:#e5e5ea;border-radius:3px;margin-bottom:10px;overflow:hidden}
 .progress-fill{height:100%;background:#1d1d1f;border-radius:3px;transition:width .4s}
 
-/* Card — fixed height so nothing jumps */
-.card{background:#fff;border-radius:20px;border:1px solid #e5e5ea;padding:24px 20px;text-align:center;margin-bottom:14px;height:230px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:border-color .2s}
+/* CARD */
+.card{background:#fff;border-radius:20px;border:1.5px solid #e5e5ea;padding:24px 20px 16px;text-align:center;margin-bottom:12px;height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:border-color .2s}
 .card.correct{border-color:#34c759}
 .card.wrong{border-color:#ff3b30}
-.card-top{font-size:11px;color:#6e6e73;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
-.card-cat{font-size:11px;background:#f2f2f7;color:#6e6e73;padding:3px 10px;border-radius:10px;margin-bottom:8px;display:inline-block}
-.card-word{font-size:34px;font-weight:600;color:#1d1d1f;line-height:1.1;margin-bottom:4px}
-.card-pron{font-size:14px;color:#8e8e93;font-style:italic;margin-bottom:6px;min-height:20px}
-.speak-btn{background:none;border:1.5px solid #d1d1d6;border-radius:20px;padding:5px 14px;font-size:12px;color:#6e6e73;cursor:pointer;margin-bottom:4px;display:inline-flex;align-items:center;gap:5px;transition:background .1s}
-.speak-btn:active{background:#f2f2f7}
+.card.revealed{border-color:#007aff}
+.card-top{font-size:10px;color:#aeaeb2;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.card-cat{font-size:10px;background:#f2f2f7;color:#6e6e73;padding:2px 8px;border-radius:8px;margin-bottom:8px;display:inline-block}
+.card-word{font-size:34px;font-weight:600;color:#1d1d1f;line-height:1.1;margin-bottom:3px}
+.card-pron{font-size:13px;color:#8e8e93;font-style:italic;margin-bottom:5px;min-height:18px}
 .card-hint{font-size:12px;color:#aeaeb2;min-height:16px}
-.result-bar{height:36px;display:flex;align-items:center;justify-content:center;margin-top:8px}
-.result{font-size:14px;font-weight:500;padding:6px 18px;border-radius:10px;display:inline-block;animation:fadeIn .2s ease}
-@keyframes fadeIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.speak-btn{background:none;border:1.5px solid #e5e5ea;border-radius:20px;padding:4px 12px;font-size:11px;color:#6e6e73;cursor:pointer;margin-bottom:4px;display:inline-flex;align-items:center;gap:4px}
+.revealed-word{font-size:22px;font-weight:500;color:#007aff;margin-top:8px;animation:fadeIn .25s ease}
+.result-bar{height:32px;display:flex;align-items:center;justify-content:center;margin-top:4px}
+.result{font-size:13px;font-weight:500;padding:5px 16px;border-radius:8px;display:inline-block;animation:fadeIn .2s ease}
 .ok{background:#d1f5e0;color:#1c7c3e}
 .no{background:#ffe0e0;color:#c0392b}
+.revealed-ans{background:#e8f0fe;color:#1a56db}
+@keyframes fadeIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
 
-.input-row{display:flex;gap:8px;margin-bottom:10px}
-.input-row input{flex:1;padding:13px 14px;font-size:16px;border:1.5px solid #d1d1d6;border-radius:12px;background:#fff;color:#1d1d1f;outline:none;-webkit-appearance:none;transition:border-color .15s}
+/* STREAK */
+#streak-wrap{text-align:center;height:26px;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+.streak{font-size:12px;font-weight:500;color:#ff9500;background:#fff8e6;padding:4px 12px;border-radius:8px}
+
+/* BUTTONS */
+.input-row{display:flex;gap:8px;margin-bottom:8px}
+.input-row input{flex:1;padding:12px 14px;font-size:16px;border:1.5px solid #d1d1d6;border-radius:12px;background:#fff;color:#1d1d1f;outline:none;-webkit-appearance:none}
 .input-row input:focus{border-color:#1d1d1f}
-.btn{padding:13px 18px;font-size:15px;font-weight:500;border:1.5px solid #1d1d1f;border-radius:12px;background:#1d1d1f;color:#fff;cursor:pointer;transition:opacity .1s}
-.btn:active{opacity:.8}
-.btn-sec{width:100%;padding:11px;font-size:13px;color:#6e6e73;border:1.5px solid #d1d1d6;border-radius:12px;background:#fff;cursor:pointer;margin-bottom:6px}
-.verb-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;justify-content:center}
-.vbtn{padding:8px 13px;font-size:12px;font-weight:500;border:1.5px solid #d1d1d6;border-radius:10px;background:#fff;color:#6e6e73;cursor:pointer;transition:all .15s}
-.vbtn.active{background:#1d1d1f;color:#fff;border-color:#1d1d1f}
-#streak-wrap,#streak-wrap-b{text-align:center;height:32px;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
-.streak{font-size:13px;font-weight:500;color:#ff9500;background:#fff8e6;padding:5px 14px;border-radius:10px;display:inline-block}
+.btn-ok{padding:12px 16px;font-size:15px;font-weight:600;border:none;border-radius:12px;background:#1d1d1f;color:#fff;cursor:pointer}
+.btn-row{display:flex;gap:8px;margin-bottom:4px}
+.btn-skip{flex:1;padding:10px;font-size:12px;color:#6e6e73;border:1.5px solid #d1d1d6;border-radius:10px;background:#fff;cursor:pointer}
+.btn-dontknow{flex:1;padding:10px;font-size:12px;font-weight:500;color:#ff3b30;border:1.5px solid #ffb3b3;border-radius:10px;background:#fff5f5;cursor:pointer}
 
-/* Celebration overlay */
-#celebration{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;z-index:100;opacity:0;transition:opacity .3s}
-#celebration.show{opacity:1}
-#celebration.hide{opacity:0}
-.cel-msg{font-size:28px;font-weight:700;color:#1d1d1f;text-align:center;line-height:1.3;animation:popIn .4s cubic-bezier(.175,.885,.32,1.275)}
-@keyframes popIn{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}
-.confetti-wrap{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden}
-.dot{position:absolute;width:8px;height:8px;border-radius:50%;animation:fall linear forwards}
-@keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+/* CONFETTI */
+#confetti-wrap{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden;z-index:999}
+.dot{position:absolute;width:9px;height:9px;border-radius:50%;animation:fall linear forwards;opacity:0}
+@keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:0}}
 </style>
 </head>
 <body>
-<div id="celebration">
-  <div class="confetti-wrap" id="confetti-wrap"></div>
-  <div class="cel-msg" id="cel-msg"></div>
-</div>
-
+<div id="confetti-wrap"></div>
 <div id="app">
-  <h1>Flashcards Inglés</h1>
-  <div class="tabs">
-    <button class="tab active" onclick="switchSection('vocab')">Vocabulario</button>
-    <button class="tab" onclick="switchSection('verbs')">Verbos</button>
+
+  <div class="topbar">
+    <h1>Flashcards</h1>
+    <div class="topbar-right">
+      <span class="learned-badge" id="learned-badge">0 aprendidas</span>
+      <button class="menu-btn" onclick="toggleMenu()" id="menu-btn-label">Opciones</button>
+    </div>
   </div>
 
-  <div id="section-vocab">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-      <button class="pill active" id="mode-en" onclick="setMode('en')" style="text-align:center">Inglés → Español</button>
-      <button class="pill" id="mode-es" onclick="setMode('es')" style="text-align:center">Español → Inglés</button>
+  <!-- COLLAPSIBLE MENU -->
+  <div id="menu-panel">
+    <div class="menu-tabs">
+      <button class="tab active" id="tab-vocab" onclick="switchSection('vocab')">Vocabulario</button>
+      <button class="tab" id="tab-verbs" onclick="switchSection('verbs')">Verbos</button>
     </div>
-    <div class="scroll-row" id="cat-btns"></div>
-    <div class="stats">
-      <div class="stat"><div class="stat-n" id="v-c">0</div><div class="stat-l">Bien</div></div>
-      <div class="stat"><div class="stat-n" id="v-w">0</div><div class="stat-l">Error</div></div>
-      <div class="stat"><div class="stat-n" id="v-r">—</div><div class="stat-l">Quedan</div></div>
+
+    <div id="menu-vocab">
+      <div class="menu-section">
+        <div class="menu-label">Dirección</div>
+        <div class="scroll-row">
+          <button class="pill active" id="mode-en" onclick="setMode('en')">Inglés → Español</button>
+          <button class="pill" id="mode-es" onclick="setMode('es')">Español → Inglés</button>
+        </div>
+      </div>
+      <div class="menu-section">
+        <div class="menu-label">Categoría</div>
+        <div class="scroll-row" id="cat-btns"></div>
+      </div>
     </div>
-    <div class="progress"><div class="progress-fill" id="v-prog" style="width:0%"></div></div>
-    <div id="streak-wrap"></div>
-    <div class="card" id="v-card">
-      <div class="card-top" id="v-badge">inglés</div>
-      <div class="card-cat" id="v-cat"></div>
-      <div class="card-word" id="v-word">—</div>
-      <div class="card-pron" id="v-pron"></div>
-      <button class="speak-btn" id="v-speak" onclick="speakWord()" style="display:none">&#9654; Escuchar</button>
-      <div class="card-hint" id="v-hint"></div>
-      <div class="result-bar"><div id="v-res"></div></div>
+
+    <div id="menu-verbs" style="display:none">
+      <div class="menu-section">
+        <div class="menu-label">Tipo</div>
+        <div class="verb-row">
+          <button class="vbtn active" id="vt-all" onclick="setVT('all')">Todos</button>
+          <button class="vbtn" id="vt-reg" onclick="setVT('regular')">Regulares</button>
+          <button class="vbtn" id="vt-irr" onclick="setVT('irregular')">Irregulares</button>
+        </div>
+      </div>
+      <div class="menu-section">
+        <div class="menu-label">Modo</div>
+        <div class="verb-row">
+          <button class="vbtn active" id="tn-past" onclick="setTense('past')">Pasado</button>
+          <button class="vbtn" id="tn-pp" onclick="setTense('pp')">Participio</button>
+          <button class="vbtn" id="tn-inf" onclick="setTense('inf')">Infinitivo</button>
+        </div>
+      </div>
+      <div class="rule-box" id="rule-box"></div>
     </div>
-    <div class="input-row">
-      <input id="v-in" type="text" placeholder="Tu respuesta..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <button class="btn" onclick="checkV()">OK</button>
-    </div>
-    <button class="btn-sec" onclick="skipV()">Saltar esta carta</button>
   </div>
 
-  <div id="section-verbs" style="display:none">
-    <div class="verb-row">
-      <button class="vbtn active" id="vt-all" onclick="setVT('all')">Todos</button>
-      <button class="vbtn" id="vt-reg" onclick="setVT('regular')">Regulares</button>
-      <button class="vbtn" id="vt-irr" onclick="setVT('irregular')">Irregulares</button>
-    </div>
-    <div class="verb-row">
-      <button class="vbtn active" id="tn-past" onclick="setTense('past')">Pasado (V2)</button>
-      <button class="vbtn" id="tn-pp" onclick="setTense('pp')">Participio (V3)</button>
-      <button class="vbtn" id="tn-inf" onclick="setTense('inf')">Infinitivo</button>
-    </div>
-    <div class="stats">
-      <div class="stat"><div class="stat-n" id="b-c">0</div><div class="stat-l">Bien</div></div>
-      <div class="stat"><div class="stat-n" id="b-w">0</div><div class="stat-l">Error</div></div>
-      <div class="stat"><div class="stat-n" id="b-r">—</div><div class="stat-l">Quedan</div></div>
-    </div>
-    <div class="progress"><div class="progress-fill" id="b-prog" style="width:0%"></div></div>
-    <div id="streak-wrap-b"></div>
-    <div class="card" id="b-card">
-      <div class="card-top" id="b-badge">verbo</div>
-      <div class="card-word" id="b-word">—</div>
-      <div class="card-pron" id="b-pron"></div>
-      <button class="speak-btn" id="b-speak" onclick="speakVerb()" style="display:none">&#9654; Escuchar</button>
-      <div class="card-hint" id="b-hint" style="font-size:12px;color:#aeaeb2;margin-top:4px"></div>
-      <div class="result-bar"><div id="b-res"></div></div>
-    </div>
-    <div class="input-row">
-      <input id="b-in" type="text" placeholder="Tu respuesta..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <button class="btn" onclick="checkB()">OK</button>
-    </div>
-    <button class="btn-sec" onclick="skipB()">Saltar esta carta</button>
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><div class="stat-n" id="s-c">0</div><div class="stat-l">Bien</div></div>
+    <div class="stat"><div class="stat-n" id="s-w">0</div><div class="stat-l">Error</div></div>
+    <div class="stat"><div class="stat-n" id="s-r">—</div><div class="stat-l">Quedan</div></div>
+    <div class="stat"><div class="stat-n" id="s-s">0</div><div class="stat-l">Racha</div></div>
+  </div>
+  <div class="progress"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+  <div id="streak-wrap"></div>
+
+  <!-- CARD -->
+  <div class="card" id="main-card">
+    <div class="card-top" id="c-badge"></div>
+    <div class="card-cat" id="c-cat"></div>
+    <div class="card-word" id="c-word">—</div>
+    <div class="card-pron" id="c-pron"></div>
+    <button class="speak-btn" id="c-speak" onclick="doSpeak()" style="display:none">&#9654; Escuchar</button>
+    <div class="card-hint" id="c-hint"></div>
+    <div id="c-revealed"></div>
+    <div class="result-bar"><div id="c-res"></div></div>
+  </div>
+
+  <div class="input-row">
+    <input id="main-in" type="text" placeholder="Tu respuesta..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+    <button class="btn-ok" onclick="checkAnswer()">OK</button>
+  </div>
+  <div class="btn-row">
+    <button class="btn-skip" onclick="doSkip()">Saltar</button>
+    <button class="btn-dontknow" onclick="dontKnow()">No lo sé</button>
   </div>
 </div>
 
 <script>
+// ── VERB RULES ──────────────────────────────────────────────
+const RULES={
+  past:'<strong>Pasado simple</strong> — te doy el infinitivo, escribí cómo se dijo en pasado.<br>Ej: <em>go → went</em> · <em>work → worked</em>',
+  pp:'<strong>Participio pasado</strong> — se usa con "have/has/had" o en pasiva.<br>Ej: <em>I have <u>eaten</u></em> · <em>It was <u>broken</u></em>',
+  inf:'<strong>Infinitivo</strong> — te doy la forma en pasado, escribí el infinitivo.<br>Ej: <em>went → go</em> · <em>bought → buy</em>'
+};
+
+// ── VOCABULARY DATA ──────────────────────────────────────────
 const V=[
-  {en:'house',pr:'haus',es:'casa',c:'Hogar'},{en:'apartment',pr:'uh-PART-ment',es:'apartamento',c:'Hogar'},{en:'room',pr:'rum',es:'habitación',c:'Hogar'},{en:'kitchen',pr:'KIT-chen',es:'cocina',c:'Hogar'},{en:'bathroom',pr:'BATH-rum',es:'baño',c:'Hogar'},{en:'bedroom',pr:'BED-rum',es:'dormitorio',c:'Hogar'},{en:'living room',pr:'LIV-ing rum',es:'sala de estar',c:'Hogar'},{en:'window',pr:'WIN-doh',es:'ventana',c:'Hogar'},{en:'door',pr:'dor',es:'puerta',c:'Hogar'},{en:'table',pr:'TAY-bul',es:'mesa',c:'Hogar'},{en:'chair',pr:'cher',es:'silla',c:'Hogar'},{en:'bed',pr:'bed',es:'cama',c:'Hogar'},{en:'sofa',pr:'SOH-fah',es:'sofá',c:'Hogar'},{en:'lamp',pr:'lamp',es:'lámpara',c:'Hogar'},{en:'floor',pr:'flor',es:'suelo',c:'Hogar'},{en:'ceiling',pr:'SEE-ling',es:'techo',c:'Hogar'},{en:'wall',pr:'wol',es:'pared',c:'Hogar'},{en:'stairs',pr:'sterz',es:'escaleras',c:'Hogar'},{en:'garden',pr:'GAR-den',es:'jardín',c:'Hogar'},{en:'garage',pr:'guh-RAZH',es:'garaje',c:'Hogar'},{en:'roof',pr:'ruf',es:'tejado',c:'Hogar'},{en:'balcony',pr:'BAL-kuh-nee',es:'balcón',c:'Hogar'},{en:'shelf',pr:'shelf',es:'estantería',c:'Hogar'},{en:'mirror',pr:'MIR-er',es:'espejo',c:'Hogar'},{en:'curtain',pr:'KUR-ten',es:'cortina',c:'Hogar'},{en:'drawer',pr:'dror',es:'cajón',c:'Hogar'},{en:'cupboard',pr:'KUB-erd',es:'armario',c:'Hogar'},{en:'hallway',pr:'HOL-way',es:'pasillo',c:'Hogar'},{en:'basement',pr:'BAYS-ment',es:'sótano',c:'Hogar'},{en:'attic',pr:'AT-ik',es:'ático/desván',c:'Hogar'},
-  {en:'bread',pr:'bred',es:'pan',c:'Comida'},{en:'milk',pr:'milk',es:'leche',c:'Comida'},{en:'egg',pr:'eg',es:'huevo',c:'Comida'},{en:'apple',pr:'AP-ul',es:'manzana',c:'Comida'},{en:'water',pr:'WOT-er',es:'agua',c:'Comida'},{en:'rice',pr:'rais',es:'arroz',c:'Comida'},{en:'chicken',pr:'CHIK-en',es:'pollo',c:'Comida'},{en:'fish',pr:'fish',es:'pescado',c:'Comida'},{en:'meat',pr:'meet',es:'carne',c:'Comida'},{en:'salad',pr:'SAL-ed',es:'ensalada',c:'Comida'},{en:'soup',pr:'sup',es:'sopa',c:'Comida'},{en:'cheese',pr:'cheez',es:'queso',c:'Comida'},{en:'butter',pr:'BUT-er',es:'mantequilla',c:'Comida'},{en:'sugar',pr:'SHUG-er',es:'azúcar',c:'Comida'},{en:'salt',pr:'solt',es:'sal',c:'Comida'},{en:'pepper',pr:'PEP-er',es:'pimienta',c:'Comida'},{en:'orange',pr:'OR-inj',es:'naranja',c:'Comida'},{en:'banana',pr:'buh-NAN-ah',es:'plátano',c:'Comida'},{en:'tomato',pr:'tuh-MAY-toh',es:'tomate',c:'Comida'},{en:'potato',pr:'puh-TAY-toh',es:'patata',c:'Comida'},{en:'onion',pr:'UN-yun',es:'cebolla',c:'Comida'},{en:'garlic',pr:'GAR-lik',es:'ajo',c:'Comida'},{en:'coffee',pr:'KOF-ee',es:'café',c:'Comida'},{en:'tea',pr:'tee',es:'té',c:'Comida'},{en:'juice',pr:'jus',es:'zumo',c:'Comida'},{en:'wine',pr:'wain',es:'vino',c:'Comida'},{en:'beer',pr:'beer',es:'cerveza',c:'Comida'},{en:'cake',pr:'kayk',es:'pastel',c:'Comida'},{en:'mushroom',pr:'MUSH-rum',es:'champiñón',c:'Comida'},{en:'spinach',pr:'SPIN-ij',es:'espinaca',c:'Comida'},{en:'lettuce',pr:'LET-us',es:'lechuga',c:'Comida'},{en:'cucumber',pr:'KYOO-kum-ber',es:'pepino',c:'Comida'},{en:'strawberry',pr:'STRAW-ber-ee',es:'fresa',c:'Comida'},{en:'pineapple',pr:'PINE-ap-ul',es:'piña',c:'Comida'},{en:'grapes',pr:'grayps',es:'uvas',c:'Comida'},{en:'peach',pr:'peech',es:'melocotón',c:'Comida'},{en:'pear',pr:'per',es:'pera',c:'Comida'},{en:'lamb',pr:'lam',es:'cordero',c:'Comida'},{en:'pork',pr:'pork',es:'cerdo',c:'Comida'},{en:'shrimp',pr:'shrimp',es:'gamba',c:'Comida'},{en:'avocado',pr:'av-uh-KAH-doh',es:'aguacate',c:'Comida'},{en:'honey',pr:'HUN-ee',es:'miel',c:'Comida'},{en:'jam',pr:'jam',es:'mermelada',c:'Comida'},{en:'oats',pr:'ohts',es:'avena',c:'Comida'},{en:'vinegar',pr:'VIN-uh-ger',es:'vinagre',c:'Comida'},{en:'mustard',pr:'MUS-terd',es:'mostaza',c:'Comida'},
-  {en:'shirt',pr:'shurt',es:'camisa',c:'Ropa'},{en:'trousers',pr:'TROW-zerz',es:'pantalones',c:'Ropa'},{en:'dress',pr:'dres',es:'vestido',c:'Ropa'},{en:'skirt',pr:'skurt',es:'falda',c:'Ropa'},{en:'jacket',pr:'JAK-et',es:'chaqueta',c:'Ropa'},{en:'coat',pr:'koht',es:'abrigo',c:'Ropa'},{en:'shoes',pr:'shooz',es:'zapatos',c:'Ropa'},{en:'socks',pr:'soks',es:'calcetines',c:'Ropa'},{en:'hat',pr:'hat',es:'sombrero',c:'Ropa'},{en:'scarf',pr:'skarf',es:'bufanda',c:'Ropa'},{en:'gloves',pr:'gluvz',es:'guantes',c:'Ropa'},{en:'sweater',pr:'SWET-er',es:'jersey',c:'Ropa'},{en:'boots',pr:'buts',es:'botas',c:'Ropa'},{en:'jeans',pr:'jeenz',es:'vaqueros',c:'Ropa'},{en:'tie',pr:'tai',es:'corbata',c:'Ropa'},{en:'belt',pr:'belt',es:'cinturón',c:'Ropa'},{en:'raincoat',pr:'RAYN-koht',es:'impermeable',c:'Ropa'},{en:'zipper',pr:'ZIP-er',es:'cremallera',c:'Ropa'},{en:'hoodie',pr:'HOO-dee',es:'sudadera con capucha',c:'Ropa'},{en:'sneakers',pr:'SNEE-kerz',es:'zapatillas deportivas',c:'Ropa'},{en:'leggings',pr:'LEG-ingz',es:'mallas',c:'Ropa'},{en:'flip flops',pr:'flip flops',es:'chanclas',c:'Ropa'},{en:'vest',pr:'vest',es:'chaleco',c:'Ropa'},{en:'tights',pr:'taits',es:'medias',c:'Ropa'},{en:'swimsuit',pr:'SWIM-sut',es:'bañador',c:'Ropa'},
-  {en:'head',pr:'hed',es:'cabeza',c:'Cuerpo'},{en:'hand',pr:'hand',es:'mano',c:'Cuerpo'},{en:'eye',pr:'ai',es:'ojo',c:'Cuerpo'},{en:'mouth',pr:'mauth',es:'boca',c:'Cuerpo'},{en:'nose',pr:'nohz',es:'nariz',c:'Cuerpo'},{en:'ear',pr:'eer',es:'oreja',c:'Cuerpo'},{en:'hair',pr:'her',es:'pelo',c:'Cuerpo'},{en:'neck',pr:'nek',es:'cuello',c:'Cuerpo'},{en:'shoulder',pr:'SHOHL-der',es:'hombro',c:'Cuerpo'},{en:'arm',pr:'arm',es:'brazo',c:'Cuerpo'},{en:'leg',pr:'leg',es:'pierna',c:'Cuerpo'},{en:'foot',pr:'fut',es:'pie',c:'Cuerpo'},{en:'finger',pr:'FING-ger',es:'dedo',c:'Cuerpo'},{en:'back',pr:'bak',es:'espalda',c:'Cuerpo'},{en:'chest',pr:'chest',es:'pecho',c:'Cuerpo'},{en:'stomach',pr:'STUM-uk',es:'estómago',c:'Cuerpo'},{en:'heart',pr:'hart',es:'corazón',c:'Cuerpo'},{en:'knee',pr:'nee',es:'rodilla',c:'Cuerpo'},{en:'tooth',pr:'tuth',es:'diente',c:'Cuerpo'},{en:'lip',pr:'lip',es:'labio',c:'Cuerpo'},{en:'tongue',pr:'tung',es:'lengua',c:'Cuerpo'},{en:'thumb',pr:'thum',es:'pulgar',c:'Cuerpo'},{en:'wrist',pr:'rist',es:'muñeca',c:'Cuerpo'},{en:'elbow',pr:'EL-boh',es:'codo',c:'Cuerpo'},{en:'ankle',pr:'ANK-ul',es:'tobillo',c:'Cuerpo'},{en:'chin',pr:'chin',es:'barbilla',c:'Cuerpo'},{en:'forehead',pr:'FOR-hed',es:'frente',c:'Cuerpo'},{en:'cheek',pr:'cheek',es:'mejilla',c:'Cuerpo'},{en:'spine',pr:'spain',es:'columna vertebral',c:'Cuerpo'},{en:'lung',pr:'lung',es:'pulmón',c:'Cuerpo'},
-  {en:'sun',pr:'sun',es:'sol',c:'Naturaleza'},{en:'moon',pr:'mun',es:'luna',c:'Naturaleza'},{en:'sky',pr:'skai',es:'cielo',c:'Naturaleza'},{en:'rain',pr:'rayn',es:'lluvia',c:'Naturaleza'},{en:'snow',pr:'snoh',es:'nieve',c:'Naturaleza'},{en:'wind',pr:'wind',es:'viento',c:'Naturaleza'},{en:'cloud',pr:'klaud',es:'nube',c:'Naturaleza'},{en:'tree',pr:'tree',es:'árbol',c:'Naturaleza'},{en:'flower',pr:'FLAW-er',es:'flor',c:'Naturaleza'},{en:'river',pr:'RIV-er',es:'río',c:'Naturaleza'},{en:'sea',pr:'see',es:'mar',c:'Naturaleza'},{en:'mountain',pr:'MOWN-ten',es:'montaña',c:'Naturaleza'},{en:'forest',pr:'FOR-est',es:'bosque',c:'Naturaleza'},{en:'beach',pr:'beech',es:'playa',c:'Naturaleza'},{en:'stone',pr:'stohn',es:'piedra',c:'Naturaleza'},{en:'fire',pr:'fai-er',es:'fuego',c:'Naturaleza'},{en:'ice',pr:'ais',es:'hielo',c:'Naturaleza'},{en:'star',pr:'star',es:'estrella',c:'Naturaleza'},{en:'lake',pr:'layk',es:'lago',c:'Naturaleza'},{en:'island',pr:'AI-lend',es:'isla',c:'Naturaleza'},{en:'desert',pr:'DEZ-ert',es:'desierto',c:'Naturaleza'},{en:'storm',pr:'storm',es:'tormenta',c:'Naturaleza'},{en:'thunder',pr:'THUN-der',es:'trueno',c:'Naturaleza'},{en:'lightning',pr:'LAIT-ning',es:'relámpago',c:'Naturaleza'},{en:'earthquake',pr:'URTH-kwayk',es:'terremoto',c:'Naturaleza'},{en:'volcano',pr:'vol-KAY-noh',es:'volcán',c:'Naturaleza'},{en:'fog',pr:'fog',es:'niebla',c:'Naturaleza'},{en:'flood',pr:'flud',es:'inundación',c:'Naturaleza'},{en:'drought',pr:'draut',es:'sequía',c:'Naturaleza'},{en:'glacier',pr:'GLAY-sher',es:'glaciar',c:'Naturaleza'},
-  {en:'dog',pr:'dog',es:'perro',c:'Animales'},{en:'cat',pr:'kat',es:'gato',c:'Animales'},{en:'bird',pr:'burd',es:'pájaro',c:'Animales'},{en:'horse',pr:'hors',es:'caballo',c:'Animales'},{en:'cow',pr:'kau',es:'vaca',c:'Animales'},{en:'pig',pr:'pig',es:'cerdo',c:'Animales'},{en:'sheep',pr:'sheep',es:'oveja',c:'Animales'},{en:'rabbit',pr:'RAB-it',es:'conejo',c:'Animales'},{en:'lion',pr:'LAI-un',es:'león',c:'Animales'},{en:'tiger',pr:'TAI-ger',es:'tigre',c:'Animales'},{en:'elephant',pr:'EL-uh-fent',es:'elefante',c:'Animales'},{en:'bear',pr:'ber',es:'oso',c:'Animales'},{en:'wolf',pr:'wulf',es:'lobo',c:'Animales'},{en:'fox',pr:'foks',es:'zorro',c:'Animales'},{en:'eagle',pr:'EE-gul',es:'águila',c:'Animales'},{en:'snake',pr:'snayk',es:'serpiente',c:'Animales'},{en:'dolphin',pr:'DOL-fin',es:'delfín',c:'Animales'},{en:'whale',pr:'wayl',es:'ballena',c:'Animales'},{en:'monkey',pr:'MUN-kee',es:'mono',c:'Animales'},{en:'deer',pr:'deer',es:'ciervo',c:'Animales'},{en:'crocodile',pr:'KROK-uh-dail',es:'cocodrilo',c:'Animales'},{en:'penguin',pr:'PENG-gwin',es:'pingüino',c:'Animales'},{en:'giraffe',pr:'juh-RAF',es:'jirafa',c:'Animales'},{en:'zebra',pr:'ZEE-bruh',es:'cebra',c:'Animales'},{en:'shark',pr:'shark',es:'tiburón',c:'Animales'},{en:'octopus',pr:'OK-tuh-pus',es:'pulpo',c:'Animales'},{en:'frog',pr:'frog',es:'rana',c:'Animales'},{en:'turtle',pr:'TUR-tul',es:'tortuga',c:'Animales'},{en:'parrot',pr:'PAR-ut',es:'loro',c:'Animales'},{en:'bat',pr:'bat',es:'murciélago',c:'Animales'},
-  {en:'street',pr:'street',es:'calle',c:'Ciudad'},{en:'road',pr:'rohd',es:'carretera',c:'Ciudad'},{en:'bridge',pr:'brij',es:'puente',c:'Ciudad'},{en:'park',pr:'park',es:'parque',c:'Ciudad'},{en:'hospital',pr:'HOS-pit-ul',es:'hospital',c:'Ciudad'},{en:'school',pr:'skul',es:'escuela',c:'Ciudad'},{en:'church',pr:'church',es:'iglesia',c:'Ciudad'},{en:'shop',pr:'shop',es:'tienda',c:'Ciudad'},{en:'market',pr:'MAR-kit',es:'mercado',c:'Ciudad'},{en:'bank',pr:'bank',es:'banco',c:'Ciudad'},{en:'hotel',pr:'hoh-TEL',es:'hotel',c:'Ciudad'},{en:'restaurant',pr:'RES-tuh-ront',es:'restaurante',c:'Ciudad'},{en:'museum',pr:'myoo-ZEE-um',es:'museo',c:'Ciudad'},{en:'library',pr:'LAI-brer-ee',es:'biblioteca',c:'Ciudad'},{en:'airport',pr:'AIR-port',es:'aeropuerto',c:'Ciudad'},{en:'station',pr:'STAY-shun',es:'estación',c:'Ciudad'},{en:'pharmacy',pr:'FAR-muh-see',es:'farmacia',c:'Ciudad'},{en:'gym',pr:'jim',es:'gimnasio',c:'Ciudad'},{en:'cinema',pr:'SIN-uh-muh',es:'cine',c:'Ciudad'},{en:'square',pr:'skwer',es:'plaza',c:'Ciudad'},{en:'embassy',pr:'EM-buh-see',es:'embajada',c:'Ciudad'},{en:'courthouse',pr:'KORT-hous',es:'juzgado',c:'Ciudad'},{en:'tunnel',pr:'TUN-ul',es:'túnel',c:'Ciudad'},{en:'pavement',pr:'PAYV-ment',es:'acera',c:'Ciudad'},{en:'warehouse',pr:'WER-hous',es:'almacén',c:'Ciudad'},
-  {en:'doctor',pr:'DOK-ter',es:'médico',c:'Trabajos'},{en:'nurse',pr:'nurs',es:'enfermero',c:'Trabajos'},{en:'teacher',pr:'TEE-cher',es:'profesor',c:'Trabajos'},{en:'engineer',pr:'en-jih-NEER',es:'ingeniero',c:'Trabajos'},{en:'lawyer',pr:'LOY-er',es:'abogado',c:'Trabajos'},{en:'architect',pr:'AR-kih-tekt',es:'arquitecto',c:'Trabajos'},{en:'chef',pr:'shef',es:'cocinero',c:'Trabajos'},{en:'waiter',pr:'WAY-ter',es:'camarero',c:'Trabajos'},{en:'driver',pr:'DRAI-ver',es:'conductor',c:'Trabajos'},{en:'pilot',pr:'PAI-lut',es:'piloto',c:'Trabajos'},{en:'firefighter',pr:'FAIR-fai-ter',es:'bombero',c:'Trabajos'},{en:'police officer',pr:'puh-LEES OF-ih-ser',es:'policía',c:'Trabajos'},{en:'mechanic',pr:'muh-KAN-ik',es:'mecánico',c:'Trabajos'},{en:'electrician',pr:'ih-lek-TRISH-un',es:'electricista',c:'Trabajos'},{en:'plumber',pr:'PLUM-er',es:'fontanero',c:'Trabajos'},{en:'carpenter',pr:'KAR-pen-ter',es:'carpintero',c:'Trabajos'},{en:'farmer',pr:'FAR-mer',es:'agricultor',c:'Trabajos'},{en:'journalist',pr:'JUR-nuh-list',es:'periodista',c:'Trabajos'},{en:'programmer',pr:'PROH-gram-er',es:'programador',c:'Trabajos'},{en:'accountant',pr:'uh-KOWN-tent',es:'contable',c:'Trabajos'},{en:'surgeon',pr:'SUR-jun',es:'cirujano',c:'Trabajos'},{en:'psychologist',pr:'sai-KOL-uh-jist',es:'psicólogo',c:'Trabajos'},{en:'translator',pr:'TRANS-lay-ter',es:'traductor',c:'Trabajos'},{en:'dentist',pr:'DEN-tist',es:'dentista',c:'Trabajos'},{en:'pharmacist',pr:'FAR-muh-sist',es:'farmacéutico',c:'Trabajos'},{en:'stockbroker',pr:'STOK-broh-ker',es:'corredor de bolsa',c:'Trabajos'},{en:'economist',pr:'ih-KON-uh-mist',es:'economista',c:'Trabajos'},{en:'librarian',pr:'lai-BRER-ee-un',es:'bibliotecario',c:'Trabajos'},{en:'butcher',pr:'BUCH-er',es:'carnicero',c:'Trabajos'},{en:'baker',pr:'BAY-ker',es:'panadero',c:'Trabajos'},
-  {en:'dawn',pr:'don',es:'amanecer',c:'Tiempo del día'},{en:'sunrise',pr:'SUN-raiz',es:'salida del sol',c:'Tiempo del día'},{en:'morning',pr:'MOR-ning',es:'mañana',c:'Tiempo del día'},{en:'midday',pr:'MID-day',es:'mediodía',c:'Tiempo del día'},{en:'afternoon',pr:'af-ter-NUN',es:'tarde',c:'Tiempo del día'},{en:'sunset',pr:'SUN-set',es:'atardecer',c:'Tiempo del día'},{en:'dusk',pr:'dusk',es:'anochecer',c:'Tiempo del día'},{en:'evening',pr:'EEV-ning',es:'primera noche',c:'Tiempo del día'},{en:'night',pr:'nait',es:'noche',c:'Tiempo del día'},{en:'midnight',pr:'MID-nait',es:'medianoche',c:'Tiempo del día'},{en:'early morning',pr:'UR-lee MOR-ning',es:'madrugada',c:'Tiempo del día'},{en:'rush hour',pr:'rush aur',es:'hora punta',c:'Tiempo del día'},{en:'bedtime',pr:'BED-taim',es:'hora de dormir',c:'Tiempo del día'},{en:'lunchtime',pr:'LUNCH-taim',es:'hora de comer',c:'Tiempo del día'},{en:'weekend',pr:'WEEK-end',es:'fin de semana',c:'Tiempo del día'},{en:'weekday',pr:'WEEK-day',es:'día laborable',c:'Tiempo del día'},{en:'shift',pr:'shift',es:'turno de trabajo',c:'Tiempo del día'},{en:'break',pr:'brayk',es:'descanso',c:'Tiempo del día'},{en:'daytime',pr:'DAY-taim',es:'de día',c:'Tiempo del día'},{en:'nighttime',pr:'NAIT-taim',es:'de noche',c:'Tiempo del día'},
-  {en:'wake up',pr:'wayk up',es:'despertarse',c:'Rutina'},{en:'shower',pr:'SHAW-er',es:'ducha',c:'Rutina'},{en:'breakfast',pr:'BREK-fust',es:'desayuno',c:'Rutina'},{en:'lunch',pr:'lunch',es:'almuerzo',c:'Rutina'},{en:'dinner',pr:'DIN-er',es:'cena',c:'Rutina'},{en:'commute',pr:'kuh-MYUT',es:'desplazamiento al trabajo',c:'Rutina'},{en:'meeting',pr:'MEE-ting',es:'reunión',c:'Rutina'},{en:'appointment',pr:'uh-POINT-ment',es:'cita',c:'Rutina'},{en:'errand',pr:'ER-und',es:'recado',c:'Rutina'},{en:'grocery shopping',pr:'GROH-ser-ee SHOP-ing',es:'hacer la compra',c:'Rutina'},{en:'laundry',pr:'LON-dree',es:'colada',c:'Rutina'},{en:'nap',pr:'nap',es:'siesta',c:'Rutina'},{en:'exercise',pr:'EK-ser-saiz',es:'ejercicio',c:'Rutina'},{en:'deadline',pr:'DED-lain',es:'fecha límite',c:'Rutina'},{en:'schedule',pr:'SKED-yul',es:'horario',c:'Rutina'},{en:'budget',pr:'BUJ-it',es:'presupuesto',c:'Rutina'},{en:'bill',pr:'bil',es:'factura',c:'Rutina'},{en:'receipt',pr:'rih-SEET',es:'recibo',c:'Rutina'},{en:'overtime',pr:'OH-ver-taim',es:'horas extras',c:'Rutina'},{en:'homework',pr:'HOHM-wurk',es:'deberes',c:'Rutina'},
-  {en:'mother',pr:'MUTH-er',es:'madre',c:'Familia'},{en:'father',pr:'FAH-ther',es:'padre',c:'Familia'},{en:'brother',pr:'BRUTH-er',es:'hermano',c:'Familia'},{en:'sister',pr:'SIS-ter',es:'hermana',c:'Familia'},{en:'grandmother',pr:'GRAND-muth-er',es:'abuela',c:'Familia'},{en:'grandfather',pr:'GRAND-fah-ther',es:'abuelo',c:'Familia'},{en:'uncle',pr:'UN-kul',es:'tío',c:'Familia'},{en:'aunt',pr:'ant',es:'tía',c:'Familia'},{en:'cousin',pr:'KUZ-in',es:'primo',c:'Familia'},{en:'husband',pr:'HUZ-bend',es:'marido',c:'Familia'},{en:'wife',pr:'waif',es:'esposa',c:'Familia'},{en:'son',pr:'sun',es:'hijo',c:'Familia'},{en:'daughter',pr:'DOT-er',es:'hija',c:'Familia'},{en:'baby',pr:'BAY-bee',es:'bebé',c:'Familia'},{en:'twin',pr:'twin',es:'gemelo',c:'Familia'},{en:'godfather',pr:'GOD-fah-ther',es:'padrino',c:'Familia'},{en:'godmother',pr:'GOD-muth-er',es:'madrina',c:'Familia'},{en:'stepfather',pr:'STEP-fah-ther',es:'padrastro',c:'Familia'},{en:'stepmother',pr:'STEP-muth-er',es:'madrastra',c:'Familia'},{en:'widow',pr:'WID-oh',es:'viuda',c:'Familia'},
-  {en:'car',pr:'kar',es:'coche',c:'Transporte'},{en:'bus',pr:'bus',es:'autobús',c:'Transporte'},{en:'train',pr:'trayn',es:'tren',c:'Transporte'},{en:'plane',pr:'playn',es:'avión',c:'Transporte'},{en:'boat',pr:'boht',es:'barco',c:'Transporte'},{en:'bicycle',pr:'BAI-sik-ul',es:'bicicleta',c:'Transporte'},{en:'motorcycle',pr:'MOH-ter-sai-kul',es:'moto',c:'Transporte'},{en:'taxi',pr:'TAK-see',es:'taxi',c:'Transporte'},{en:'subway',pr:'SUB-way',es:'metro',c:'Transporte'},{en:'ticket',pr:'TIK-et',es:'billete',c:'Transporte'},{en:'traffic',pr:'TRAF-ik',es:'tráfico',c:'Transporte'},{en:'highway',pr:'HAI-way',es:'autopista',c:'Transporte'},{en:'platform',pr:'PLAT-form',es:'andén',c:'Transporte'},{en:'customs',pr:'KUS-tumz',es:'aduana',c:'Transporte'},{en:'passport',pr:'PAS-port',es:'pasaporte',c:'Transporte'},{en:'seatbelt',pr:'SEET-belt',es:'cinturón de seguridad',c:'Transporte'},{en:'roundabout',pr:'ROUND-uh-baut',es:'rotonda',c:'Transporte'},{en:'fuel',pr:'fyool',es:'combustible',c:'Transporte'},{en:'timetable',pr:'TAIM-tay-bul',es:'horario de transporte',c:'Transporte'},{en:'journey',pr:'JUR-nee',es:'viaje',c:'Transporte'},
-  {en:'happy',pr:'HAP-ee',es:'feliz',c:'Emociones'},{en:'sad',pr:'sad',es:'triste',c:'Emociones'},{en:'angry',pr:'ANG-gree',es:'enfadado',c:'Emociones'},{en:'scared',pr:'skerd',es:'asustado',c:'Emociones'},{en:'tired',pr:'taird',es:'cansado',c:'Emociones'},{en:'bored',pr:'bord',es:'aburrido',c:'Emociones'},{en:'excited',pr:'ik-SAI-ted',es:'emocionado',c:'Emociones'},{en:'nervous',pr:'NUR-vus',es:'nervioso',c:'Emociones'},{en:'proud',pr:'praud',es:'orgulloso',c:'Emociones'},{en:'lonely',pr:'LOHN-lee',es:'solo',c:'Emociones'},{en:'confused',pr:'kun-FYUZD',es:'confundido',c:'Emociones'},{en:'grateful',pr:'GRAYT-ful',es:'agradecido',c:'Emociones'},{en:'anxious',pr:'ANK-shus',es:'ansioso',c:'Emociones'},{en:'relaxed',pr:'rih-LAKST',es:'relajado',c:'Emociones'},{en:'embarrassed',pr:'em-BAR-est',es:'avergonzado',c:'Emociones'},{en:'disappointed',pr:'dis-uh-POIN-ted',es:'decepcionado',c:'Emociones'},{en:'overwhelmed',pr:'oh-ver-WELMD',es:'agobiado',c:'Emociones'},{en:'frustrated',pr:'FRUS-tray-ted',es:'frustrado',c:'Emociones'},{en:'relieved',pr:'rih-LEEVD',es:'aliviado',c:'Emociones'},{en:'content',pr:'kun-TENT',es:'satisfecho',c:'Emociones'},
-  {en:'phone',pr:'fohn',es:'teléfono',c:'Tecnología'},{en:'computer',pr:'kum-PYOO-ter',es:'ordenador',c:'Tecnología'},{en:'screen',pr:'skreen',es:'pantalla',c:'Tecnología'},{en:'keyboard',pr:'KEE-bord',es:'teclado',c:'Tecnología'},{en:'battery',pr:'BAT-er-ee',es:'batería',c:'Tecnología'},{en:'charger',pr:'CHAR-jer',es:'cargador',c:'Tecnología'},{en:'camera',pr:'KAM-er-uh',es:'cámara',c:'Tecnología'},{en:'headphones',pr:'HED-fohnz',es:'auriculares',c:'Tecnología'},{en:'internet',pr:'IN-ter-net',es:'internet',c:'Tecnología'},{en:'password',pr:'PAS-wurd',es:'contraseña',c:'Tecnología'},{en:'software',pr:'SOFT-wer',es:'software',c:'Tecnología'},{en:'hardware',pr:'HARD-wer',es:'hardware',c:'Tecnología'},{en:'database',pr:'DAY-tuh-bays',es:'base de datos',c:'Tecnología'},{en:'algorithm',pr:'AL-guh-rith-um',es:'algoritmo',c:'Tecnología'},{en:'server',pr:'SUR-ver',es:'servidor',c:'Tecnología'},{en:'firewall',pr:'FAIR-wol',es:'cortafuegos',c:'Tecnología'},{en:'browser',pr:'BROW-zer',es:'navegador',c:'Tecnología'},{en:'backup',pr:'BAK-up',es:'copia de seguridad',c:'Tecnología'},{en:'wireless',pr:'WAIR-les',es:'inalámbrico',c:'Tecnología'},{en:'encryption',pr:'en-KRIP-shun',es:'cifrado',c:'Tecnología'},
-  {en:'red',pr:'red',es:'rojo',c:'Colores'},{en:'blue',pr:'bloo',es:'azul',c:'Colores'},{en:'green',pr:'green',es:'verde',c:'Colores'},{en:'yellow',pr:'YEL-oh',es:'amarillo',c:'Colores'},{en:'orange',pr:'OR-inj',es:'naranja',c:'Colores'},{en:'purple',pr:'PUR-pul',es:'morado',c:'Colores'},{en:'pink',pr:'pink',es:'rosa',c:'Colores'},{en:'black',pr:'blak',es:'negro',c:'Colores'},{en:'white',pr:'wait',es:'blanco',c:'Colores'},{en:'grey',pr:'gray',es:'gris',c:'Colores'},{en:'brown',pr:'braun',es:'marrón',c:'Colores'},{en:'gold',pr:'gohld',es:'dorado',c:'Colores'},{en:'silver',pr:'SIL-ver',es:'plateado',c:'Colores'},{en:'turquoise',pr:'TUR-koiz',es:'turquesa',c:'Colores'},{en:'navy blue',pr:'NAY-vee bloo',es:'azul marino',c:'Colores'},{en:'crimson',pr:'KRIM-zun',es:'carmesí',c:'Colores'},{en:'beige',pr:'bayzh',es:'beige',c:'Colores'},{en:'scarlet',pr:'SKAR-let',es:'escarlata',c:'Colores'},{en:'ivory',pr:'AI-vuh-ree',es:'marfil',c:'Colores'},{en:'magenta',pr:'muh-JEN-tuh',es:'magenta',c:'Colores'},
-  {en:'Monday',pr:'MUN-day',es:'lunes',c:'Días y meses'},{en:'Tuesday',pr:'TYOOZ-day',es:'martes',c:'Días y meses'},{en:'Wednesday',pr:'WENZ-day',es:'miércoles',c:'Días y meses'},{en:'Thursday',pr:'THURZ-day',es:'jueves',c:'Días y meses'},{en:'Friday',pr:'FRAI-day',es:'viernes',c:'Días y meses'},{en:'Saturday',pr:'SAT-er-day',es:'sábado',c:'Días y meses'},{en:'Sunday',pr:'SUN-day',es:'domingo',c:'Días y meses'},{en:'January',pr:'JAN-yoo-er-ee',es:'enero',c:'Días y meses'},{en:'February',pr:'FEB-roo-er-ee',es:'febrero',c:'Días y meses'},{en:'March',pr:'march',es:'marzo',c:'Días y meses'},{en:'April',pr:'AY-prul',es:'abril',c:'Días y meses'},{en:'May',pr:'may',es:'mayo',c:'Días y meses'},{en:'June',pr:'jun',es:'junio',c:'Días y meses'},{en:'July',pr:'joo-LAI',es:'julio',c:'Días y meses'},{en:'August',pr:'AW-gust',es:'agosto',c:'Días y meses'},{en:'September',pr:'sep-TEM-ber',es:'septiembre',c:'Días y meses'},{en:'October',pr:'ok-TOH-ber',es:'octubre',c:'Días y meses'},{en:'November',pr:'noh-VEM-ber',es:'noviembre',c:'Días y meses'},{en:'December',pr:'dih-SEM-ber',es:'diciembre',c:'Días y meses'},{en:'yesterday',pr:'YES-ter-day',es:'ayer',c:'Días y meses'},{en:'today',pr:'tuh-DAY',es:'hoy',c:'Días y meses'},{en:'tomorrow',pr:'tuh-MOR-oh',es:'mañana',c:'Días y meses'},{en:'fortnight',pr:'FORT-nait',es:'quincena',c:'Días y meses'},
-  {en:'one',pr:'wun',es:'uno',c:'Números'},{en:'two',pr:'tuu',es:'dos',c:'Números'},{en:'three',pr:'three',es:'tres',c:'Números'},{en:'four',pr:'for',es:'cuatro',c:'Números'},{en:'five',pr:'faiv',es:'cinco',c:'Números'},{en:'six',pr:'siks',es:'seis',c:'Números'},{en:'seven',pr:'SEV-en',es:'siete',c:'Números'},{en:'eight',pr:'ayt',es:'ocho',c:'Números'},{en:'nine',pr:'nain',es:'nueve',c:'Números'},{en:'ten',pr:'ten',es:'diez',c:'Números'},{en:'eleven',pr:'ih-LEV-en',es:'once',c:'Números'},{en:'twelve',pr:'twelv',es:'doce',c:'Números'},{en:'thirteen',pr:'thur-TEEN',es:'trece',c:'Números'},{en:'fourteen',pr:'for-TEEN',es:'catorce',c:'Números'},{en:'fifteen',pr:'fif-TEEN',es:'quince',c:'Números'},{en:'twenty',pr:'TWEN-tee',es:'veinte',c:'Números'},{en:'thirty',pr:'THUR-tee',es:'treinta',c:'Números'},{en:'forty',pr:'FOR-tee',es:'cuarenta',c:'Números'},{en:'fifty',pr:'FIF-tee',es:'cincuenta',c:'Números'},{en:'hundred',pr:'HUN-dred',es:'cien',c:'Números'},{en:'thousand',pr:'THOW-zend',es:'mil',c:'Números'},{en:'million',pr:'MIL-yun',es:'millón',c:'Números'},{en:'first',pr:'furst',es:'primero',c:'Números'},{en:'second',pr:'SEK-und',es:'segundo',c:'Números'},{en:'third',pr:'thurd',es:'tercero',c:'Números'},{en:'half',pr:'haf',es:'mitad',c:'Números'},{en:'quarter',pr:'KWOR-ter',es:'cuarto',c:'Números'},{en:'dozen',pr:'DUZ-en',es:'docena',c:'Números'},{en:'once',pr:'wuns',es:'una vez',c:'Números'},{en:'twice',pr:'twais',es:'dos veces',c:'Números'},{en:'zero',pr:'ZEE-roh',es:'cero',c:'Números'},
-  {en:'big',pr:'big',es:'grande',c:'Adjetivos'},{en:'small',pr:'smol',es:'pequeño',c:'Adjetivos'},{en:'tall',pr:'tol',es:'alto',c:'Adjetivos'},{en:'short',pr:'short',es:'bajo/corto',c:'Adjetivos'},{en:'fast',pr:'fast',es:'rápido',c:'Adjetivos'},{en:'slow',pr:'sloh',es:'lento',c:'Adjetivos'},{en:'heavy',pr:'HEV-ee',es:'pesado',c:'Adjetivos'},{en:'light',pr:'lait',es:'ligero/claro',c:'Adjetivos'},{en:'hot',pr:'hot',es:'caliente',c:'Adjetivos'},{en:'cold',pr:'kohld',es:'frío',c:'Adjetivos'},{en:'warm',pr:'worm',es:'cálido',c:'Adjetivos'},{en:'clean',pr:'kleen',es:'limpio',c:'Adjetivos'},{en:'dirty',pr:'DUR-tee',es:'sucio',c:'Adjetivos'},{en:'loud',pr:'laud',es:'ruidoso',c:'Adjetivos'},{en:'quiet',pr:'KWAI-et',es:'silencioso',c:'Adjetivos'},{en:'expensive',pr:'ik-SPEN-siv',es:'caro',c:'Adjetivos'},{en:'cheap',pr:'cheep',es:'barato',c:'Adjetivos'},{en:'dangerous',pr:'DAYN-jer-us',es:'peligroso',c:'Adjetivos'},{en:'brave',pr:'brayv',es:'valiente',c:'Adjetivos'},{en:'honest',pr:'ON-est',es:'honesto',c:'Adjetivos'},{en:'generous',pr:'JEN-er-us',es:'generoso',c:'Adjetivos'},{en:'stubborn',pr:'STUB-ern',es:'terco',c:'Adjetivos'},{en:'clever',pr:'KLEV-er',es:'listo',c:'Adjetivos'},{en:'ambitious',pr:'am-BISH-us',es:'ambicioso',c:'Adjetivos'},{en:'arrogant',pr:'AR-uh-gent',es:'arrogante',c:'Adjetivos'},{en:'humble',pr:'HUM-bul',es:'humilde',c:'Adjetivos'},{en:'cunning',pr:'KUN-ing',es:'astuto',c:'Adjetivos'},{en:'witty',pr:'WIT-ee',es:'ingenioso',c:'Adjetivos'},{en:'gullible',pr:'GUL-ih-bul',es:'ingenuo',c:'Adjetivos'},{en:'clumsy',pr:'KLUM-zee',es:'torpe',c:'Adjetivos'},
-  {en:'contract',pr:'KON-trakt',es:'contrato',c:'Negocios'},{en:'invoice',pr:'IN-vois',es:'factura',c:'Negocios'},{en:'profit',pr:'PROF-it',es:'beneficio',c:'Negocios'},{en:'loss',pr:'los',es:'pérdida',c:'Negocios'},{en:'revenue',pr:'REV-en-yoo',es:'ingresos',c:'Negocios'},{en:'investment',pr:'in-VEST-ment',es:'inversión',c:'Negocios'},{en:'shareholder',pr:'SHER-hohl-der',es:'accionista',c:'Negocios'},{en:'headquarters',pr:'HED-kwor-terz',es:'sede central',c:'Negocios'},{en:'merger',pr:'MUR-jer',es:'fusión empresarial',c:'Negocios'},{en:'bankruptcy',pr:'BANK-rupt-see',es:'quiebra',c:'Negocios'},{en:'trademark',pr:'TRAYD-mark',es:'marca registrada',c:'Negocios'},{en:'patent',pr:'PAY-tent',es:'patente',c:'Negocios'},{en:'franchise',pr:'FRAN-chaiz',es:'franquicia',c:'Negocios'},{en:'turnover',pr:'TURN-oh-ver',es:'facturación',c:'Negocios'},{en:'overhead',pr:'OH-ver-hed',es:'gastos generales',c:'Negocios'},{en:'subsidiary',pr:'sub-SID-ee-er-ee',es:'filial',c:'Negocios'},{en:'stakeholder',pr:'STAYK-hohl-der',es:'parte interesada',c:'Negocios'},{en:'niche',pr:'nitch',es:'nicho de mercado',c:'Negocios'},{en:'leverage',pr:'LEV-er-ij',es:'apalancamiento',c:'Negocios'},{en:'bid',pr:'bid',es:'oferta/licitación',c:'Negocios'},
-  {en:'headache',pr:'HED-ayk',es:'dolor de cabeza',c:'Salud'},{en:'fever',pr:'FEE-ver',es:'fiebre',c:'Salud'},{en:'cough',pr:'kof',es:'tos',c:'Salud'},{en:'allergy',pr:'AL-er-jee',es:'alergia',c:'Salud'},{en:'vaccine',pr:'vak-SEEN',es:'vacuna',c:'Salud'},{en:'symptom',pr:'SIMP-tum',es:'síntoma',c:'Salud'},{en:'prescription',pr:'prih-SKRIP-shun',es:'receta médica',c:'Salud'},{en:'surgery',pr:'SUR-jer-ee',es:'cirugía',c:'Salud'},{en:'fracture',pr:'FRAK-cher',es:'fractura',c:'Salud'},{en:'sprain',pr:'sprayn',es:'esguince',c:'Salud'},{en:'bruise',pr:'brooz',es:'moratón',c:'Salud'},{en:'diagnosis',pr:'dai-ug-NOH-sis',es:'diagnóstico',c:'Salud'},{en:'prognosis',pr:'prog-NOH-sis',es:'pronóstico',c:'Salud'},{en:'side effect',pr:'said ih-FEKT',es:'efecto secundario',c:'Salud'},{en:'chronic',pr:'KRON-ik',es:'crónico',c:'Salud'},{en:'contagious',pr:'kun-TAY-jus',es:'contagioso',c:'Salud'},{en:'immune',pr:'ih-MYUN',es:'inmune',c:'Salud'},{en:'recovery',pr:'rih-KUV-er-ee',es:'recuperación',c:'Salud'},{en:'blister',pr:'BLIS-ter',es:'ampolla',c:'Salud'},{en:'sneeze',pr:'sneez',es:'estornudo',c:'Salud'},
-  {en:'please',pr:'pleez',es:'por favor',c:'Frases útiles'},{en:'thank you',pr:'thank yoo',es:'gracias',c:'Frases útiles'},{en:'sorry',pr:'SOR-ee',es:'lo siento',c:'Frases útiles'},{en:'excuse me',pr:'eks-KYOOZ mee',es:'disculpe',c:'Frases útiles'},{en:'of course',pr:'uv kors',es:'por supuesto',c:'Frases útiles'},{en:'never mind',pr:'NEV-er maind',es:'no importa',c:'Frases útiles'},{en:'by the way',pr:'bai thuh way',es:'por cierto',c:'Frases útiles'},{en:'as soon as possible',pr:'az sun az POS-ih-bul',es:'lo antes posible',c:'Frases útiles'},{en:'on the other hand',pr:'on thuh UTH-er hand',es:'por otro lado',c:'Frases útiles'},{en:'nevertheless',pr:'nev-er-thuh-LES',es:'sin embargo',c:'Frases útiles'},{en:'although',pr:'ol-THOH',es:'aunque',c:'Frases útiles'},{en:'furthermore',pr:'FUR-ther-mor',es:'además',c:'Frases útiles'},{en:'therefore',pr:'THER-for',es:'por lo tanto',c:'Frases útiles'},{en:'regardless',pr:'rih-GARD-les',es:'independientemente',c:'Frases útiles'},{en:'meanwhile',pr:'MEEN-wail',es:'mientras tanto',c:'Frases útiles'},{en:'otherwise',pr:'UTH-er-waiz',es:'de lo contrario',c:'Frases útiles'},{en:'provided that',pr:'pruh-VAI-ded that',es:'siempre que',c:'Frases útiles'},{en:'in spite of',pr:'in spait uv',es:'a pesar de',c:'Frases útiles'},{en:'whereas',pr:'wer-AZ',es:'mientras que',c:'Frases útiles'},{en:'afterwards',pr:'AF-ter-werdz',es:'después',c:'Frases útiles'},
+  // Hogar
+  {en:'house',pr:'haus',es:['casa'],c:'Hogar'},
+  {en:'apartment',pr:'uh-PART-ment',es:['apartamento','piso','departamento'],c:'Hogar'},
+  {en:'room',pr:'rum',es:['habitación','cuarto'],c:'Hogar'},
+  {en:'kitchen',pr:'KIT-chen',es:['cocina'],c:'Hogar'},
+  {en:'bathroom',pr:'BATH-rum',es:['baño','cuarto de baño'],c:'Hogar'},
+  {en:'bedroom',pr:'BED-rum',es:['dormitorio','habitación','cuarto'],c:'Hogar'},
+  {en:'living room',pr:'LIV-ing rum',es:['sala de estar','salón','living'],c:'Hogar'},
+  {en:'window',pr:'WIN-doh',es:['ventana'],c:'Hogar'},
+  {en:'door',pr:'dor',es:['puerta'],c:'Hogar'},
+  {en:'table',pr:'TAY-bul',es:['mesa'],c:'Hogar'},
+  {en:'chair',pr:'cher',es:['silla'],c:'Hogar'},
+  {en:'bed',pr:'bed',es:['cama'],c:'Hogar'},
+  {en:'sofa',pr:'SOH-fah',es:['sofá','sillón'],c:'Hogar'},
+  {en:'lamp',pr:'lamp',es:['lámpara'],c:'Hogar'},
+  {en:'floor',pr:'flor',es:['suelo','piso'],c:'Hogar'},
+  {en:'ceiling',pr:'SEE-ling',es:['techo'],c:'Hogar'},
+  {en:'wall',pr:'wol',es:['pared','muro'],c:'Hogar'},
+  {en:'stairs',pr:'sterz',es:['escaleras','escalones'],c:'Hogar'},
+  {en:'garden',pr:'GAR-den',es:['jardín'],c:'Hogar'},
+  {en:'garage',pr:'guh-RAZH',es:['garaje','garage'],c:'Hogar'},
+  {en:'roof',pr:'ruf',es:['tejado','techo'],c:'Hogar'},
+  {en:'balcony',pr:'BAL-kuh-nee',es:['balcón'],c:'Hogar'},
+  {en:'shelf',pr:'shelf',es:['estantería','estante'],c:'Hogar'},
+  {en:'mirror',pr:'MIR-er',es:['espejo'],c:'Hogar'},
+  {en:'curtain',pr:'KUR-ten',es:['cortina'],c:'Hogar'},
+  {en:'drawer',pr:'dror',es:['cajón'],c:'Hogar'},
+  {en:'cupboard',pr:'KUB-erd',es:['armario','alacena'],c:'Hogar'},
+  {en:'hallway',pr:'HOL-way',es:['pasillo','corredor'],c:'Hogar'},
+  {en:'basement',pr:'BAYS-ment',es:['sótano'],c:'Hogar'},
+  {en:'attic',pr:'AT-ik',es:['ático','desván','buhardilla'],c:'Hogar'},
+  // Comida
+  {en:'bread',pr:'bred',es:['pan'],c:'Comida'},
+  {en:'milk',pr:'milk',es:['leche'],c:'Comida'},
+  {en:'egg',pr:'eg',es:['huevo'],c:'Comida'},
+  {en:'apple',pr:'AP-ul',es:['manzana'],c:'Comida'},
+  {en:'water',pr:'WOT-er',es:['agua'],c:'Comida'},
+  {en:'rice',pr:'rais',es:['arroz'],c:'Comida'},
+  {en:'chicken',pr:'CHIK-en',es:['pollo'],c:'Comida'},
+  {en:'fish',pr:'fish',es:['pescado','pez'],c:'Comida'},
+  {en:'meat',pr:'meet',es:['carne'],c:'Comida'},
+  {en:'salad',pr:'SAL-ed',es:['ensalada'],c:'Comida'},
+  {en:'soup',pr:'sup',es:['sopa','caldo'],c:'Comida'},
+  {en:'cheese',pr:'cheez',es:['queso'],c:'Comida'},
+  {en:'butter',pr:'BUT-er',es:['mantequilla','manteca'],c:'Comida'},
+  {en:'sugar',pr:'SHUG-er',es:['azúcar'],c:'Comida'},
+  {en:'salt',pr:'solt',es:['sal'],c:'Comida'},
+  {en:'pepper',pr:'PEP-er',es:['pimienta'],c:'Comida'},
+  {en:'orange',pr:'OR-inj',es:['naranja'],c:'Comida'},
+  {en:'banana',pr:'buh-NAN-ah',es:['plátano','banana'],c:'Comida'},
+  {en:'tomato',pr:'tuh-MAY-toh',es:['tomate'],c:'Comida'},
+  {en:'potato',pr:'puh-TAY-toh',es:['patata','papa'],c:'Comida'},
+  {en:'onion',pr:'UN-yun',es:['cebolla'],c:'Comida'},
+  {en:'garlic',pr:'GAR-lik',es:['ajo'],c:'Comida'},
+  {en:'coffee',pr:'KOF-ee',es:['café'],c:'Comida'},
+  {en:'tea',pr:'tee',es:['té'],c:'Comida'},
+  {en:'juice',pr:'jus',es:['zumo','jugo'],c:'Comida'},
+  {en:'wine',pr:'wain',es:['vino'],c:'Comida'},
+  {en:'beer',pr:'beer',es:['cerveza'],c:'Comida'},
+  {en:'cake',pr:'kayk',es:['pastel','torta','tarta'],c:'Comida'},
+  {en:'mushroom',pr:'MUSH-rum',es:['champiñón','hongo'],c:'Comida'},
+  {en:'spinach',pr:'SPIN-ij',es:['espinaca'],c:'Comida'},
+  {en:'lettuce',pr:'LET-us',es:['lechuga'],c:'Comida'},
+  {en:'cucumber',pr:'KYOO-kum-ber',es:['pepino'],c:'Comida'},
+  {en:'strawberry',pr:'STRAW-ber-ee',es:['fresa','frutilla'],c:'Comida'},
+  {en:'pineapple',pr:'PINE-ap-ul',es:['piña','ananá'],c:'Comida'},
+  {en:'grapes',pr:'grayps',es:['uvas','uva'],c:'Comida'},
+  {en:'peach',pr:'peech',es:['melocotón','durazno'],c:'Comida'},
+  {en:'pear',pr:'per',es:['pera'],c:'Comida'},
+  {en:'lamb',pr:'lam',es:['cordero'],c:'Comida'},
+  {en:'pork',pr:'pork',es:['cerdo','chancho','puerco'],c:'Comida'},
+  {en:'shrimp',pr:'shrimp',es:['gamba','camarón'],c:'Comida'},
+  {en:'avocado',pr:'av-uh-KAH-doh',es:['aguacate','palta'],c:'Comida'},
+  {en:'honey',pr:'HUN-ee',es:['miel'],c:'Comida'},
+  {en:'jam',pr:'jam',es:['mermelada'],c:'Comida'},
+  {en:'oats',pr:'ohts',es:['avena'],c:'Comida'},
+  {en:'vinegar',pr:'VIN-uh-ger',es:['vinagre'],c:'Comida'},
+  {en:'mustard',pr:'MUS-terd',es:['mostaza'],c:'Comida'},
+  // Ropa
+  {en:'shirt',pr:'shurt',es:['camisa'],c:'Ropa'},
+  {en:'trousers',pr:'TROW-zerz',es:['pantalones','pantalón'],c:'Ropa'},
+  {en:'dress',pr:'dres',es:['vestido'],c:'Ropa'},
+  {en:'skirt',pr:'skurt',es:['falda'],c:'Ropa'},
+  {en:'jacket',pr:'JAK-et',es:['chaqueta','campera','cazadora'],c:'Ropa'},
+  {en:'coat',pr:'koht',es:['abrigo','tapado'],c:'Ropa'},
+  {en:'shoes',pr:'shooz',es:['zapatos','calzado'],c:'Ropa'},
+  {en:'socks',pr:'soks',es:['calcetines','medias'],c:'Ropa'},
+  {en:'hat',pr:'hat',es:['sombrero','gorro'],c:'Ropa'},
+  {en:'scarf',pr:'skarf',es:['bufanda'],c:'Ropa'},
+  {en:'gloves',pr:'gluvz',es:['guantes'],c:'Ropa'},
+  {en:'sweater',pr:'SWET-er',es:['jersey','suéter','pullover'],c:'Ropa'},
+  {en:'boots',pr:'buts',es:['botas'],c:'Ropa'},
+  {en:'jeans',pr:'jeenz',es:['vaqueros','jeans','pantalón de mezclilla'],c:'Ropa'},
+  {en:'tie',pr:'tai',es:['corbata'],c:'Ropa'},
+  {en:'belt',pr:'belt',es:['cinturón'],c:'Ropa'},
+  {en:'raincoat',pr:'RAYN-koht',es:['impermeable','chubasquero'],c:'Ropa'},
+  {en:'hoodie',pr:'HOO-dee',es:['sudadera con capucha','hoodie'],c:'Ropa'},
+  {en:'sneakers',pr:'SNEE-kerz',es:['zapatillas deportivas','tenis','deportivas'],c:'Ropa'},
+  {en:'flip flops',pr:'flip flops',es:['chanclas','ojotas','sandalias'],c:'Ropa'},
+  // Cuerpo
+  {en:'hair',pr:'her',es:['pelo','cabello','cabellos'],c:'Cuerpo'},
+  {en:'head',pr:'hed',es:['cabeza'],c:'Cuerpo'},
+  {en:'hand',pr:'hand',es:['mano'],c:'Cuerpo'},
+  {en:'eye',pr:'ai',es:['ojo'],c:'Cuerpo'},
+  {en:'mouth',pr:'mauth',es:['boca'],c:'Cuerpo'},
+  {en:'nose',pr:'nohz',es:['nariz'],c:'Cuerpo'},
+  {en:'ear',pr:'eer',es:['oreja','oído'],c:'Cuerpo'},
+  {en:'neck',pr:'nek',es:['cuello'],c:'Cuerpo'},
+  {en:'shoulder',pr:'SHOHL-der',es:['hombro'],c:'Cuerpo'},
+  {en:'arm',pr:'arm',es:['brazo'],c:'Cuerpo'},
+  {en:'leg',pr:'leg',es:['pierna'],c:'Cuerpo'},
+  {en:'foot',pr:'fut',es:['pie'],c:'Cuerpo'},
+  {en:'finger',pr:'FING-ger',es:['dedo'],c:'Cuerpo'},
+  {en:'back',pr:'bak',es:['espalda'],c:'Cuerpo'},
+  {en:'chest',pr:'chest',es:['pecho'],c:'Cuerpo'},
+  {en:'stomach',pr:'STUM-uk',es:['estómago','panza','barriga'],c:'Cuerpo'},
+  {en:'heart',pr:'hart',es:['corazón'],c:'Cuerpo'},
+  {en:'knee',pr:'nee',es:['rodilla'],c:'Cuerpo'},
+  {en:'tooth',pr:'tuth',es:['diente','muela'],c:'Cuerpo'},
+  {en:'lip',pr:'lip',es:['labio'],c:'Cuerpo'},
+  {en:'tongue',pr:'tung',es:['lengua'],c:'Cuerpo'},
+  {en:'thumb',pr:'thum',es:['pulgar','dedo gordo'],c:'Cuerpo'},
+  {en:'wrist',pr:'rist',es:['muñeca'],c:'Cuerpo'},
+  {en:'elbow',pr:'EL-boh',es:['codo'],c:'Cuerpo'},
+  {en:'ankle',pr:'ANK-ul',es:['tobillo'],c:'Cuerpo'},
+  {en:'chin',pr:'chin',es:['barbilla','mentón'],c:'Cuerpo'},
+  {en:'forehead',pr:'FOR-hed',es:['frente'],c:'Cuerpo'},
+  {en:'cheek',pr:'cheek',es:['mejilla','cachete'],c:'Cuerpo'},
+  {en:'lung',pr:'lung',es:['pulmón'],c:'Cuerpo'},
+  {en:'liver',pr:'LIV-er',es:['hígado'],c:'Cuerpo'},
+  {en:'kidney',pr:'KID-nee',es:['riñón'],c:'Cuerpo'},
+  // Naturaleza
+  {en:'sun',pr:'sun',es:['sol'],c:'Naturaleza'},
+  {en:'moon',pr:'mun',es:['luna'],c:'Naturaleza'},
+  {en:'sky',pr:'skai',es:['cielo'],c:'Naturaleza'},
+  {en:'rain',pr:'rayn',es:['lluvia'],c:'Naturaleza'},
+  {en:'snow',pr:'snoh',es:['nieve'],c:'Naturaleza'},
+  {en:'wind',pr:'wind',es:['viento'],c:'Naturaleza'},
+  {en:'cloud',pr:'klaud',es:['nube'],c:'Naturaleza'},
+  {en:'tree',pr:'tree',es:['árbol'],c:'Naturaleza'},
+  {en:'flower',pr:'FLAW-er',es:['flor'],c:'Naturaleza'},
+  {en:'river',pr:'RIV-er',es:['río'],c:'Naturaleza'},
+  {en:'sea',pr:'see',es:['mar'],c:'Naturaleza'},
+  {en:'mountain',pr:'MOWN-ten',es:['montaña'],c:'Naturaleza'},
+  {en:'forest',pr:'FOR-est',es:['bosque','selva'],c:'Naturaleza'},
+  {en:'beach',pr:'beech',es:['playa'],c:'Naturaleza'},
+  {en:'stone',pr:'stohn',es:['piedra','roca'],c:'Naturaleza'},
+  {en:'fire',pr:'fai-er',es:['fuego'],c:'Naturaleza'},
+  {en:'ice',pr:'ais',es:['hielo'],c:'Naturaleza'},
+  {en:'star',pr:'star',es:['estrella'],c:'Naturaleza'},
+  {en:'lake',pr:'layk',es:['lago'],c:'Naturaleza'},
+  {en:'island',pr:'AI-lend',es:['isla'],c:'Naturaleza'},
+  {en:'desert',pr:'DEZ-ert',es:['desierto'],c:'Naturaleza'},
+  {en:'storm',pr:'storm',es:['tormenta','tempestad'],c:'Naturaleza'},
+  {en:'thunder',pr:'THUN-der',es:['trueno'],c:'Naturaleza'},
+  {en:'lightning',pr:'LAIT-ning',es:['relámpago','rayo'],c:'Naturaleza'},
+  {en:'earthquake',pr:'URTH-kwayk',es:['terremoto','sismo'],c:'Naturaleza'},
+  {en:'volcano',pr:'vol-KAY-noh',es:['volcán'],c:'Naturaleza'},
+  {en:'fog',pr:'fog',es:['niebla','neblina'],c:'Naturaleza'},
+  {en:'flood',pr:'flud',es:['inundación'],c:'Naturaleza'},
+  {en:'drought',pr:'draut',es:['sequía'],c:'Naturaleza'},
+  // Animales
+  {en:'dog',pr:'dog',es:['perro','can'],c:'Animales'},
+  {en:'cat',pr:'kat',es:['gato'],c:'Animales'},
+  {en:'bird',pr:'burd',es:['pájaro','ave'],c:'Animales'},
+  {en:'horse',pr:'hors',es:['caballo'],c:'Animales'},
+  {en:'cow',pr:'kau',es:['vaca'],c:'Animales'},
+  {en:'pig',pr:'pig',es:['cerdo','chancho','puerco'],c:'Animales'},
+  {en:'sheep',pr:'sheep',es:['oveja','cordero'],c:'Animales'},
+  {en:'rabbit',pr:'RAB-it',es:['conejo'],c:'Animales'},
+  {en:'lion',pr:'LAI-un',es:['león'],c:'Animales'},
+  {en:'tiger',pr:'TAI-ger',es:['tigre'],c:'Animales'},
+  {en:'elephant',pr:'EL-uh-fent',es:['elefante'],c:'Animales'},
+  {en:'bear',pr:'ber',es:['oso'],c:'Animales'},
+  {en:'wolf',pr:'wulf',es:['lobo'],c:'Animales'},
+  {en:'fox',pr:'foks',es:['zorro'],c:'Animales'},
+  {en:'eagle',pr:'EE-gul',es:['águila'],c:'Animales'},
+  {en:'snake',pr:'snayk',es:['serpiente','víbora'],c:'Animales'},
+  {en:'dolphin',pr:'DOL-fin',es:['delfín'],c:'Animales'},
+  {en:'whale',pr:'wayl',es:['ballena'],c:'Animales'},
+  {en:'monkey',pr:'MUN-kee',es:['mono','simio'],c:'Animales'},
+  {en:'shark',pr:'shark',es:['tiburón'],c:'Animales'},
+  {en:'frog',pr:'frog',es:['rana'],c:'Animales'},
+  {en:'turtle',pr:'TUR-tul',es:['tortuga'],c:'Animales'},
+  {en:'parrot',pr:'PAR-ut',es:['loro','papagayo'],c:'Animales'},
+  {en:'crocodile',pr:'KROK-uh-dail',es:['cocodrilo','caimán'],c:'Animales'},
+  {en:'penguin',pr:'PENG-gwin',es:['pingüino'],c:'Animales'},
+  // Ciudad
+  {en:'street',pr:'street',es:['calle'],c:'Ciudad'},
+  {en:'road',pr:'rohd',es:['carretera','camino'],c:'Ciudad'},
+  {en:'bridge',pr:'brij',es:['puente'],c:'Ciudad'},
+  {en:'park',pr:'park',es:['parque'],c:'Ciudad'},
+  {en:'hospital',pr:'HOS-pit-ul',es:['hospital'],c:'Ciudad'},
+  {en:'school',pr:'skul',es:['escuela','colegio'],c:'Ciudad'},
+  {en:'church',pr:'church',es:['iglesia'],c:'Ciudad'},
+  {en:'shop',pr:'shop',es:['tienda','comercio'],c:'Ciudad'},
+  {en:'market',pr:'MAR-kit',es:['mercado','feria'],c:'Ciudad'},
+  {en:'bank',pr:'bank',es:['banco'],c:'Ciudad'},
+  {en:'hotel',pr:'hoh-TEL',es:['hotel'],c:'Ciudad'},
+  {en:'restaurant',pr:'RES-tuh-ront',es:['restaurante','restaurán'],c:'Ciudad'},
+  {en:'museum',pr:'myoo-ZEE-um',es:['museo'],c:'Ciudad'},
+  {en:'library',pr:'LAI-brer-ee',es:['biblioteca'],c:'Ciudad'},
+  {en:'airport',pr:'AIR-port',es:['aeropuerto'],c:'Ciudad'},
+  {en:'station',pr:'STAY-shun',es:['estación'],c:'Ciudad'},
+  {en:'pharmacy',pr:'FAR-muh-see',es:['farmacia'],c:'Ciudad'},
+  {en:'gym',pr:'jim',es:['gimnasio','gym'],c:'Ciudad'},
+  {en:'cinema',pr:'SIN-uh-muh',es:['cine','cinema'],c:'Ciudad'},
+  {en:'square',pr:'skwer',es:['plaza'],c:'Ciudad'},
+  {en:'embassy',pr:'EM-buh-see',es:['embajada'],c:'Ciudad'},
+  {en:'tunnel',pr:'TUN-ul',es:['túnel'],c:'Ciudad'},
+  {en:'warehouse',pr:'WER-hous',es:['almacén','depósito'],c:'Ciudad'},
+  {en:'pavement',pr:'PAYV-ment',es:['acera','vereda','andén'],c:'Ciudad'},
+  // Trabajos
+  {en:'doctor',pr:'DOK-ter',es:['médico','doctor'],c:'Trabajos'},
+  {en:'nurse',pr:'nurs',es:['enfermero','enfermera'],c:'Trabajos'},
+  {en:'teacher',pr:'TEE-cher',es:['profesor','maestra','docente'],c:'Trabajos'},
+  {en:'engineer',pr:'en-jih-NEER',es:['ingeniero'],c:'Trabajos'},
+  {en:'lawyer',pr:'LOY-er',es:['abogado'],c:'Trabajos'},
+  {en:'architect',pr:'AR-kih-tekt',es:['arquitecto'],c:'Trabajos'},
+  {en:'chef',pr:'shef',es:['cocinero','chef'],c:'Trabajos'},
+  {en:'waiter',pr:'WAY-ter',es:['camarero','mozo','mesero'],c:'Trabajos'},
+  {en:'driver',pr:'DRAI-ver',es:['conductor','chofer'],c:'Trabajos'},
+  {en:'pilot',pr:'PAI-lut',es:['piloto'],c:'Trabajos'},
+  {en:'firefighter',pr:'FAIR-fai-ter',es:['bombero'],c:'Trabajos'},
+  {en:'police officer',pr:'puh-LEES OF-ih-ser',es:['policía','agente'],c:'Trabajos'},
+  {en:'mechanic',pr:'muh-KAN-ik',es:['mecánico'],c:'Trabajos'},
+  {en:'electrician',pr:'ih-lek-TRISH-un',es:['electricista'],c:'Trabajos'},
+  {en:'plumber',pr:'PLUM-er',es:['fontanero','plomero'],c:'Trabajos'},
+  {en:'carpenter',pr:'KAR-pen-ter',es:['carpintero'],c:'Trabajos'},
+  {en:'farmer',pr:'FAR-mer',es:['agricultor','granjero'],c:'Trabajos'},
+  {en:'journalist',pr:'JUR-nuh-list',es:['periodista'],c:'Trabajos'},
+  {en:'programmer',pr:'PROH-gram-er',es:['programador','desarrollador'],c:'Trabajos'},
+  {en:'accountant',pr:'uh-KOWN-tent',es:['contable','contador'],c:'Trabajos'},
+  {en:'surgeon',pr:'SUR-jun',es:['cirujano'],c:'Trabajos'},
+  {en:'dentist',pr:'DEN-tist',es:['dentista'],c:'Trabajos'},
+  {en:'pharmacist',pr:'FAR-muh-sist',es:['farmacéutico','farmacéutica'],c:'Trabajos'},
+  {en:'translator',pr:'TRANS-lay-ter',es:['traductor'],c:'Trabajos'},
+  {en:'economist',pr:'ih-KON-uh-mist',es:['economista'],c:'Trabajos'},
+  // Tiempo del día
+  {en:'dawn',pr:'don',es:['amanecer','alba'],c:'Tiempo del día'},
+  {en:'sunrise',pr:'SUN-raiz',es:['salida del sol','amanecer'],c:'Tiempo del día'},
+  {en:'morning',pr:'MOR-ning',es:['mañana'],c:'Tiempo del día'},
+  {en:'midday',pr:'MID-day',es:['mediodía'],c:'Tiempo del día'},
+  {en:'afternoon',pr:'af-ter-NUN',es:['tarde'],c:'Tiempo del día'},
+  {en:'sunset',pr:'SUN-set',es:['atardecer','puesta de sol'],c:'Tiempo del día'},
+  {en:'dusk',pr:'dusk',es:['anochecer','crepúsculo'],c:'Tiempo del día'},
+  {en:'evening',pr:'EEV-ning',es:['noche','tarde-noche'],c:'Tiempo del día'},
+  {en:'night',pr:'nait',es:['noche'],c:'Tiempo del día'},
+  {en:'midnight',pr:'MID-nait',es:['medianoche'],c:'Tiempo del día'},
+  {en:'early morning',pr:'UR-lee MOR-ning',es:['madrugada'],c:'Tiempo del día'},
+  {en:'rush hour',pr:'rush aur',es:['hora punta','hora pico'],c:'Tiempo del día'},
+  {en:'weekend',pr:'WEEK-end',es:['fin de semana','finde'],c:'Tiempo del día'},
+  {en:'weekday',pr:'WEEK-day',es:['día laborable','día de semana'],c:'Tiempo del día'},
+  {en:'shift',pr:'shift',es:['turno','turno de trabajo'],c:'Tiempo del día'},
+  // Rutina
+  {en:'wake up',pr:'wayk up',es:['despertarse','despertar'],c:'Rutina'},
+  {en:'shower',pr:'SHAW-er',es:['ducha','ducharse'],c:'Rutina'},
+  {en:'breakfast',pr:'BREK-fust',es:['desayuno'],c:'Rutina'},
+  {en:'lunch',pr:'lunch',es:['almuerzo','comida'],c:'Rutina'},
+  {en:'dinner',pr:'DIN-er',es:['cena'],c:'Rutina'},
+  {en:'commute',pr:'kuh-MYUT',es:['desplazamiento al trabajo','viaje al trabajo'],c:'Rutina'},
+  {en:'meeting',pr:'MEE-ting',es:['reunión'],c:'Rutina'},
+  {en:'appointment',pr:'uh-POINT-ment',es:['cita'],c:'Rutina'},
+  {en:'errand',pr:'ER-und',es:['recado','mandado'],c:'Rutina'},
+  {en:'grocery shopping',pr:'GROH-ser-ee SHOP-ing',es:['hacer la compra','ir al súper'],c:'Rutina'},
+  {en:'laundry',pr:'LON-dree',es:['colada','lavado de ropa'],c:'Rutina'},
+  {en:'nap',pr:'nap',es:['siesta'],c:'Rutina'},
+  {en:'exercise',pr:'EK-ser-saiz',es:['ejercicio','deporte'],c:'Rutina'},
+  {en:'deadline',pr:'DED-lain',es:['fecha límite','plazo'],c:'Rutina'},
+  {en:'schedule',pr:'SKED-yul',es:['horario','agenda'],c:'Rutina'},
+  // Familia
+  {en:'mother',pr:'MUTH-er',es:['madre','mamá'],c:'Familia'},
+  {en:'father',pr:'FAH-ther',es:['padre','papá'],c:'Familia'},
+  {en:'brother',pr:'BRUTH-er',es:['hermano'],c:'Familia'},
+  {en:'sister',pr:'SIS-ter',es:['hermana'],c:'Familia'},
+  {en:'grandmother',pr:'GRAND-muth-er',es:['abuela','nona','yaya'],c:'Familia'},
+  {en:'grandfather',pr:'GRAND-fah-ther',es:['abuelo','nono','yayo'],c:'Familia'},
+  {en:'uncle',pr:'UN-kul',es:['tío'],c:'Familia'},
+  {en:'aunt',pr:'ant',es:['tía'],c:'Familia'},
+  {en:'cousin',pr:'KUZ-in',es:['primo','prima'],c:'Familia'},
+  {en:'husband',pr:'HUZ-bend',es:['marido','esposo'],c:'Familia'},
+  {en:'wife',pr:'waif',es:['esposa','mujer'],c:'Familia'},
+  {en:'son',pr:'sun',es:['hijo'],c:'Familia'},
+  {en:'daughter',pr:'DOT-er',es:['hija'],c:'Familia'},
+  {en:'baby',pr:'BAY-bee',es:['bebé','bebe'],c:'Familia'},
+  {en:'twin',pr:'twin',es:['gemelo','mellizo'],c:'Familia'},
+  {en:'godfather',pr:'GOD-fah-ther',es:['padrino'],c:'Familia'},
+  {en:'godmother',pr:'GOD-muth-er',es:['madrina'],c:'Familia'},
+  {en:'widow',pr:'WID-oh',es:['viuda','viudo'],c:'Familia'},
+  // Transporte
+  {en:'car',pr:'kar',es:['coche','carro','auto','automóvil'],c:'Transporte'},
+  {en:'bus',pr:'bus',es:['autobús','bus','colectivo'],c:'Transporte'},
+  {en:'train',pr:'trayn',es:['tren'],c:'Transporte'},
+  {en:'plane',pr:'playn',es:['avión'],c:'Transporte'},
+  {en:'boat',pr:'boht',es:['barco','bote','embarcación'],c:'Transporte'},
+  {en:'bicycle',pr:'BAI-sik-ul',es:['bicicleta','bici'],c:'Transporte'},
+  {en:'motorcycle',pr:'MOH-ter-sai-kul',es:['moto','motocicleta'],c:'Transporte'},
+  {en:'taxi',pr:'TAK-see',es:['taxi','cab'],c:'Transporte'},
+  {en:'subway',pr:'SUB-way',es:['metro','subte','subterráneo'],c:'Transporte'},
+  {en:'ticket',pr:'TIK-et',es:['billete','boleto','ticket'],c:'Transporte'},
+  {en:'traffic',pr:'TRAF-ik',es:['tráfico','tránsito'],c:'Transporte'},
+  {en:'highway',pr:'HAI-way',es:['autopista','autovía'],c:'Transporte'},
+  {en:'platform',pr:'PLAT-form',es:['andén','plataforma'],c:'Transporte'},
+  {en:'passport',pr:'PAS-port',es:['pasaporte'],c:'Transporte'},
+  {en:'seatbelt',pr:'SEET-belt',es:['cinturón de seguridad'],c:'Transporte'},
+  {en:'fuel',pr:'fyool',es:['combustible','gasolina','nafta'],c:'Transporte'},
+  // Emociones
+  {en:'happy',pr:'HAP-ee',es:['feliz','contento','alegre'],c:'Emociones'},
+  {en:'sad',pr:'sad',es:['triste'],c:'Emociones'},
+  {en:'angry',pr:'ANG-gree',es:['enfadado','enojado','furioso'],c:'Emociones'},
+  {en:'scared',pr:'skerd',es:['asustado','con miedo'],c:'Emociones'},
+  {en:'tired',pr:'taird',es:['cansado'],c:'Emociones'},
+  {en:'bored',pr:'bord',es:['aburrido'],c:'Emociones'},
+  {en:'excited',pr:'ik-SAI-ted',es:['emocionado','entusiasmado'],c:'Emociones'},
+  {en:'nervous',pr:'NUR-vus',es:['nervioso'],c:'Emociones'},
+  {en:'proud',pr:'praud',es:['orgulloso'],c:'Emociones'},
+  {en:'lonely',pr:'LOHN-lee',es:['solo','solitario'],c:'Emociones'},
+  {en:'confused',pr:'kun-FYUZD',es:['confundido','desconcertado'],c:'Emociones'},
+  {en:'grateful',pr:'GRAYT-ful',es:['agradecido'],c:'Emociones'},
+  {en:'anxious',pr:'ANK-shus',es:['ansioso','angustiado'],c:'Emociones'},
+  {en:'relaxed',pr:'rih-LAKST',es:['relajado','tranquilo'],c:'Emociones'},
+  {en:'embarrassed',pr:'em-BAR-est',es:['avergonzado','con vergüenza'],c:'Emociones'},
+  {en:'disappointed',pr:'dis-uh-POIN-ted',es:['decepcionado','desilusionado'],c:'Emociones'},
+  {en:'overwhelmed',pr:'oh-ver-WELMD',es:['agobiado','abrumado'],c:'Emociones'},
+  {en:'relieved',pr:'rih-LEEVD',es:['aliviado'],c:'Emociones'},
+  {en:'frustrated',pr:'FRUS-tray-ted',es:['frustrado'],c:'Emociones'},
+  {en:'content',pr:'kun-TENT',es:['satisfecho','conforme'],c:'Emociones'},
+  // Tecnología
+  {en:'phone',pr:'fohn',es:['teléfono','celular','móvil'],c:'Tecnología'},
+  {en:'computer',pr:'kum-PYOO-ter',es:['ordenador','computadora','computador'],c:'Tecnología'},
+  {en:'screen',pr:'skreen',es:['pantalla'],c:'Tecnología'},
+  {en:'keyboard',pr:'KEE-bord',es:['teclado'],c:'Tecnología'},
+  {en:'battery',pr:'BAT-er-ee',es:['batería','pila'],c:'Tecnología'},
+  {en:'charger',pr:'CHAR-jer',es:['cargador'],c:'Tecnología'},
+  {en:'camera',pr:'KAM-er-uh',es:['cámara'],c:'Tecnología'},
+  {en:'headphones',pr:'HED-fohnz',es:['auriculares','audífonos','cascos'],c:'Tecnología'},
+  {en:'internet',pr:'IN-ter-net',es:['internet'],c:'Tecnología'},
+  {en:'password',pr:'PAS-wurd',es:['contraseña','clave'],c:'Tecnología'},
+  {en:'software',pr:'SOFT-wer',es:['software','programa'],c:'Tecnología'},
+  {en:'server',pr:'SUR-ver',es:['servidor'],c:'Tecnología'},
+  {en:'browser',pr:'BROW-zer',es:['navegador'],c:'Tecnología'},
+  {en:'backup',pr:'BAK-up',es:['copia de seguridad','respaldo'],c:'Tecnología'},
+  {en:'wireless',pr:'WAIR-les',es:['inalámbrico','wifi'],c:'Tecnología'},
+  // Colores
+  {en:'red',pr:'red',es:['rojo','colorado'],c:'Colores'},
+  {en:'blue',pr:'bloo',es:['azul'],c:'Colores'},
+  {en:'green',pr:'green',es:['verde'],c:'Colores'},
+  {en:'yellow',pr:'YEL-oh',es:['amarillo'],c:'Colores'},
+  {en:'orange',pr:'OR-inj',es:['naranja','anaranjado'],c:'Colores'},
+  {en:'purple',pr:'PUR-pul',es:['morado','violeta','púrpura'],c:'Colores'},
+  {en:'pink',pr:'pink',es:['rosa','rosado'],c:'Colores'},
+  {en:'black',pr:'blak',es:['negro'],c:'Colores'},
+  {en:'white',pr:'wait',es:['blanco'],c:'Colores'},
+  {en:'grey',pr:'gray',es:['gris'],c:'Colores'},
+  {en:'brown',pr:'braun',es:['marrón','café','pardo'],c:'Colores'},
+  {en:'gold',pr:'gohld',es:['dorado'],c:'Colores'},
+  {en:'silver',pr:'SIL-ver',es:['plateado','plata'],c:'Colores'},
+  {en:'turquoise',pr:'TUR-koiz',es:['turquesa'],c:'Colores'},
+  {en:'navy blue',pr:'NAY-vee bloo',es:['azul marino','azul oscuro'],c:'Colores'},
+  // Días y meses
+  {en:'Monday',pr:'MUN-day',es:['lunes'],c:'Días y meses'},
+  {en:'Tuesday',pr:'TYOOZ-day',es:['martes'],c:'Días y meses'},
+  {en:'Wednesday',pr:'WENZ-day',es:['miércoles'],c:'Días y meses'},
+  {en:'Thursday',pr:'THURZ-day',es:['jueves'],c:'Días y meses'},
+  {en:'Friday',pr:'FRAI-day',es:['viernes'],c:'Días y meses'},
+  {en:'Saturday',pr:'SAT-er-day',es:['sábado'],c:'Días y meses'},
+  {en:'Sunday',pr:'SUN-day',es:['domingo'],c:'Días y meses'},
+  {en:'January',pr:'JAN-yoo-er-ee',es:['enero'],c:'Días y meses'},
+  {en:'February',pr:'FEB-roo-er-ee',es:['febrero'],c:'Días y meses'},
+  {en:'March',pr:'march',es:['marzo'],c:'Días y meses'},
+  {en:'April',pr:'AY-prul',es:['abril'],c:'Días y meses'},
+  {en:'May',pr:'may',es:['mayo'],c:'Días y meses'},
+  {en:'June',pr:'jun',es:['junio'],c:'Días y meses'},
+  {en:'July',pr:'joo-LAI',es:['julio'],c:'Días y meses'},
+  {en:'August',pr:'AW-gust',es:['agosto'],c:'Días y meses'},
+  {en:'September',pr:'sep-TEM-ber',es:['septiembre'],c:'Días y meses'},
+  {en:'October',pr:'ok-TOH-ber',es:['octubre'],c:'Días y meses'},
+  {en:'November',pr:'noh-VEM-ber',es:['noviembre'],c:'Días y meses'},
+  {en:'December',pr:'dih-SEM-ber',es:['diciembre'],c:'Días y meses'},
+  {en:'yesterday',pr:'YES-ter-day',es:['ayer'],c:'Días y meses'},
+  {en:'today',pr:'tuh-DAY',es:['hoy'],c:'Días y meses'},
+  {en:'tomorrow',pr:'tuh-MOR-oh',es:['mañana'],c:'Días y meses'},
+  // Números
+  {en:'zero',pr:'ZEE-roh',es:['cero'],c:'Números'},
+  {en:'one',pr:'wun',es:['uno'],c:'Números'},
+  {en:'two',pr:'tuu',es:['dos'],c:'Números'},
+  {en:'three',pr:'three',es:['tres'],c:'Números'},
+  {en:'four',pr:'for',es:['cuatro'],c:'Números'},
+  {en:'five',pr:'faiv',es:['cinco'],c:'Números'},
+  {en:'six',pr:'siks',es:['seis'],c:'Números'},
+  {en:'seven',pr:'SEV-en',es:['siete'],c:'Números'},
+  {en:'eight',pr:'ayt',es:['ocho'],c:'Números'},
+  {en:'nine',pr:'nain',es:['nueve'],c:'Números'},
+  {en:'ten',pr:'ten',es:['diez'],c:'Números'},
+  {en:'eleven',pr:'ih-LEV-en',es:['once'],c:'Números'},
+  {en:'twelve',pr:'twelv',es:['doce'],c:'Números'},
+  {en:'twenty',pr:'TWEN-tee',es:['veinte'],c:'Números'},
+  {en:'thirty',pr:'THUR-tee',es:['treinta'],c:'Números'},
+  {en:'forty',pr:'FOR-tee',es:['cuarenta'],c:'Números'},
+  {en:'fifty',pr:'FIF-tee',es:['cincuenta'],c:'Números'},
+  {en:'hundred',pr:'HUN-dred',es:['cien','ciento'],c:'Números'},
+  {en:'thousand',pr:'THOW-zend',es:['mil'],c:'Números'},
+  {en:'million',pr:'MIL-yun',es:['millón'],c:'Números'},
+  {en:'first',pr:'furst',es:['primero','primer'],c:'Números'},
+  {en:'second',pr:'SEK-und',es:['segundo'],c:'Números'},
+  {en:'third',pr:'thurd',es:['tercero','tercer'],c:'Números'},
+  {en:'half',pr:'haf',es:['mitad','medio'],c:'Números'},
+  {en:'quarter',pr:'KWOR-ter',es:['cuarto','trimestre'],c:'Números'},
+  {en:'dozen',pr:'DUZ-en',es:['docena'],c:'Números'},
+  {en:'once',pr:'wuns',es:['una vez'],c:'Números'},
+  {en:'twice',pr:'twais',es:['dos veces'],c:'Números'},
+  // Adjetivos
+  {en:'big',pr:'big',es:['grande'],c:'Adjetivos'},
+  {en:'small',pr:'smol',es:['pequeño','chico'],c:'Adjetivos'},
+  {en:'tall',pr:'tol',es:['alto'],c:'Adjetivos'},
+  {en:'short',pr:'short',es:['bajo','corto'],c:'Adjetivos'},
+  {en:'fast',pr:'fast',es:['rápido','veloz'],c:'Adjetivos'},
+  {en:'slow',pr:'sloh',es:['lento'],c:'Adjetivos'},
+  {en:'heavy',pr:'HEV-ee',es:['pesado'],c:'Adjetivos'},
+  {en:'light',pr:'lait',es:['ligero','liviano','claro'],c:'Adjetivos'},
+  {en:'hot',pr:'hot',es:['caliente','caluroso'],c:'Adjetivos'},
+  {en:'cold',pr:'kohld',es:['frío'],c:'Adjetivos'},
+  {en:'warm',pr:'worm',es:['cálido','tibio','templado'],c:'Adjetivos'},
+  {en:'clean',pr:'kleen',es:['limpio'],c:'Adjetivos'},
+  {en:'dirty',pr:'DUR-tee',es:['sucio'],c:'Adjetivos'},
+  {en:'loud',pr:'laud',es:['ruidoso','fuerte'],c:'Adjetivos'},
+  {en:'quiet',pr:'KWAI-et',es:['silencioso','tranquilo','callado'],c:'Adjetivos'},
+  {en:'expensive',pr:'ik-SPEN-siv',es:['caro','costoso'],c:'Adjetivos'},
+  {en:'cheap',pr:'cheep',es:['barato','económico'],c:'Adjetivos'},
+  {en:'dangerous',pr:'DAYN-jer-us',es:['peligroso'],c:'Adjetivos'},
+  {en:'brave',pr:'brayv',es:['valiente'],c:'Adjetivos'},
+  {en:'honest',pr:'ON-est',es:['honesto','honrado'],c:'Adjetivos'},
+  {en:'generous',pr:'JEN-er-us',es:['generoso'],c:'Adjetivos'},
+  {en:'stubborn',pr:'STUB-ern',es:['terco','obstinado','cabezón'],c:'Adjetivos'},
+  {en:'clever',pr:'KLEV-er',es:['listo','inteligente','astuto'],c:'Adjetivos'},
+  {en:'ambitious',pr:'am-BISH-us',es:['ambicioso'],c:'Adjetivos'},
+  {en:'humble',pr:'HUM-bul',es:['humilde'],c:'Adjetivos'},
+  // Negocios
+  {en:'contract',pr:'KON-trakt',es:['contrato'],c:'Negocios'},
+  {en:'invoice',pr:'IN-vois',es:['factura'],c:'Negocios'},
+  {en:'profit',pr:'PROF-it',es:['beneficio','ganancia'],c:'Negocios'},
+  {en:'loss',pr:'los',es:['pérdida'],c:'Negocios'},
+  {en:'revenue',pr:'REV-en-yoo',es:['ingresos','facturación'],c:'Negocios'},
+  {en:'investment',pr:'in-VEST-ment',es:['inversión'],c:'Negocios'},
+  {en:'shareholder',pr:'SHER-hohl-der',es:['accionista'],c:'Negocios'},
+  {en:'headquarters',pr:'HED-kwor-terz',es:['sede central','casa matriz'],c:'Negocios'},
+  {en:'merger',pr:'MUR-jer',es:['fusión','fusión empresarial'],c:'Negocios'},
+  {en:'bankruptcy',pr:'BANK-rupt-see',es:['quiebra','bancarrota'],c:'Negocios'},
+  {en:'trademark',pr:'TRAYD-mark',es:['marca registrada'],c:'Negocios'},
+  {en:'patent',pr:'PAY-tent',es:['patente'],c:'Negocios'},
+  {en:'franchise',pr:'FRAN-chaiz',es:['franquicia'],c:'Negocios'},
+  {en:'turnover',pr:'TURN-oh-ver',es:['facturación','rotación'],c:'Negocios'},
+  {en:'overhead',pr:'OH-ver-hed',es:['gastos generales','gastos fijos'],c:'Negocios'},
+  {en:'niche',pr:'nitch',es:['nicho','nicho de mercado'],c:'Negocios'},
+  // Salud
+  {en:'headache',pr:'HED-ayk',es:['dolor de cabeza','jaqueca'],c:'Salud'},
+  {en:'fever',pr:'FEE-ver',es:['fiebre','temperatura'],c:'Salud'},
+  {en:'cough',pr:'kof',es:['tos'],c:'Salud'},
+  {en:'allergy',pr:'AL-er-jee',es:['alergia'],c:'Salud'},
+  {en:'vaccine',pr:'vak-SEEN',es:['vacuna'],c:'Salud'},
+  {en:'symptom',pr:'SIMP-tum',es:['síntoma'],c:'Salud'},
+  {en:'prescription',pr:'prih-SKRIP-shun',es:['receta médica','receta'],c:'Salud'},
+  {en:'surgery',pr:'SUR-jer-ee',es:['cirugía','operación'],c:'Salud'},
+  {en:'fracture',pr:'FRAK-cher',es:['fractura'],c:'Salud'},
+  {en:'sprain',pr:'sprayn',es:['esguince','torcedura'],c:'Salud'},
+  {en:'bruise',pr:'brooz',es:['moratón','moretón','cardenal'],c:'Salud'},
+  {en:'diagnosis',pr:'dai-ug-NOH-sis',es:['diagnóstico'],c:'Salud'},
+  {en:'chronic',pr:'KRON-ik',es:['crónico'],c:'Salud'},
+  {en:'contagious',pr:'kun-TAY-jus',es:['contagioso'],c:'Salud'},
+  {en:'recovery',pr:'rih-KUV-er-ee',es:['recuperación'],c:'Salud'},
+  // Frases útiles
+  {en:'please',pr:'pleez',es:['por favor'],c:'Frases útiles'},
+  {en:'thank you',pr:'thank yoo',es:['gracias'],c:'Frases útiles'},
+  {en:'sorry',pr:'SOR-ee',es:['lo siento','perdón','disculpa'],c:'Frases útiles'},
+  {en:'excuse me',pr:'eks-KYOOZ mee',es:['disculpe','con permiso'],c:'Frases útiles'},
+  {en:'of course',pr:'uv kors',es:['por supuesto','claro'],c:'Frases útiles'},
+  {en:'never mind',pr:'NEV-er maind',es:['no importa','no pasa nada'],c:'Frases útiles'},
+  {en:'by the way',pr:'bai thuh way',es:['por cierto','a propósito'],c:'Frases útiles'},
+  {en:'as soon as possible',pr:'az sun az POS-ih-bul',es:['lo antes posible','cuanto antes'],c:'Frases útiles'},
+  {en:'nevertheless',pr:'nev-er-thuh-LES',es:['sin embargo','no obstante'],c:'Frases útiles'},
+  {en:'although',pr:'ol-THOH',es:['aunque','a pesar de que'],c:'Frases útiles'},
+  {en:'furthermore',pr:'FUR-ther-mor',es:['además','es más'],c:'Frases útiles'},
+  {en:'therefore',pr:'THER-for',es:['por lo tanto','por ende'],c:'Frases útiles'},
+  {en:'meanwhile',pr:'MEEN-wail',es:['mientras tanto','entretanto'],c:'Frases útiles'},
+  {en:'otherwise',pr:'UTH-er-waiz',es:['de lo contrario','si no'],c:'Frases útiles'},
+  {en:'in spite of',pr:'in spait uv',es:['a pesar de'],c:'Frases útiles'},
+  {en:'on the other hand',pr:'on thuh UTH-er hand',es:['por otro lado','por otra parte'],c:'Frases útiles'},
 ];
 
+// ── VERB DATA ────────────────────────────────────────────────
 const B=[
   {i:'be',p:'was/were',pp:'been',pr_i:'bee',pr_p:'woz/wur',es:'ser/estar',t:'irregular'},
   {i:'have',p:'had',pp:'had',pr_i:'hav',pr_p:'had',es:'tener',t:'irregular'},
   {i:'do',p:'did',pp:'done',pr_i:'doo',pr_p:'did',es:'hacer',t:'irregular'},
   {i:'go',p:'went',pp:'gone',pr_i:'goh',pr_p:'went',es:'ir',t:'irregular'},
   {i:'say',p:'said',pp:'said',pr_i:'say',pr_p:'sed',es:'decir',t:'irregular'},
-  {i:'get',p:'got',pp:'got/gotten',pr_i:'get',pr_p:'got',es:'obtener',t:'irregular'},
+  {i:'get',p:'got',pp:'got/gotten',pr_i:'get',pr_p:'got',es:'obtener/conseguir',t:'irregular'},
   {i:'make',p:'made',pp:'made',pr_i:'mayk',pr_p:'mayd',es:'hacer/crear',t:'irregular'},
   {i:'know',p:'knew',pp:'known',pr_i:'noh',pr_p:'nyoo',es:'saber/conocer',t:'irregular'},
   {i:'think',p:'thought',pp:'thought',pr_i:'think',pr_p:'thot',es:'pensar',t:'irregular'},
@@ -186,49 +689,49 @@ const B=[
   {i:'speak',p:'spoke',pp:'spoken',pr_i:'speek',pr_p:'spohk',es:'hablar',t:'irregular'},
   {i:'run',p:'ran',pp:'run',pr_i:'run',pr_p:'ran',es:'correr',t:'irregular'},
   {i:'eat',p:'ate',pp:'eaten',pr_i:'eet',pr_p:'ayt',es:'comer',t:'irregular'},
-  {i:'drink',p:'drank',pp:'drunk',pr_i:'drink',pr_p:'drank',es:'beber',t:'irregular'},
+  {i:'drink',p:'drank',pp:'drunk',pr_i:'drink',pr_p:'drank',es:'beber/tomar',t:'irregular'},
   {i:'sleep',p:'slept',pp:'slept',pr_i:'sleep',pr_p:'slept',es:'dormir',t:'irregular'},
   {i:'leave',p:'left',pp:'left',pr_i:'leev',pr_p:'left',es:'salir/dejar',t:'irregular'},
   {i:'feel',p:'felt',pp:'felt',pr_i:'feel',pr_p:'felt',es:'sentir',t:'irregular'},
-  {i:'keep',p:'kept',pp:'kept',pr_i:'keep',pr_p:'kept',es:'mantener',t:'irregular'},
+  {i:'keep',p:'kept',pp:'kept',pr_i:'keep',pr_p:'kept',es:'mantener/guardar',t:'irregular'},
   {i:'begin',p:'began',pp:'begun',pr_i:'bih-GIN',pr_p:'bih-GAN',es:'empezar',t:'irregular'},
   {i:'lose',p:'lost',pp:'lost',pr_i:'looz',pr_p:'lost',es:'perder',t:'irregular'},
   {i:'pay',p:'paid',pp:'paid',pr_i:'pay',pr_p:'payd',es:'pagar',t:'irregular'},
-  {i:'send',p:'sent',pp:'sent',pr_i:'send',pr_p:'sent',es:'enviar',t:'irregular'},
+  {i:'send',p:'sent',pp:'sent',pr_i:'send',pr_p:'sent',es:'enviar/mandar',t:'irregular'},
   {i:'break',p:'broke',pp:'broken',pr_i:'brayk',pr_p:'brohk',es:'romper',t:'irregular'},
   {i:'bring',p:'brought',pp:'brought',pr_i:'bring',pr_p:'brot',es:'traer',t:'irregular'},
-  {i:'catch',p:'caught',pp:'caught',pr_i:'kach',pr_p:'kot',es:'atrapar',t:'irregular'},
+  {i:'catch',p:'caught',pp:'caught',pr_i:'kach',pr_p:'kot',es:'atrapar/coger',t:'irregular'},
   {i:'teach',p:'taught',pp:'taught',pr_i:'teech',pr_p:'tot',es:'enseñar',t:'irregular'},
-  {i:'tell',p:'told',pp:'told',pr_i:'tel',pr_p:'tohld',es:'contar',t:'irregular'},
+  {i:'tell',p:'told',pp:'told',pr_i:'tel',pr_p:'tohld',es:'decir/contar',t:'irregular'},
   {i:'sell',p:'sold',pp:'sold',pr_i:'sel',pr_p:'sohld',es:'vender',t:'irregular'},
   {i:'fall',p:'fell',pp:'fallen',pr_i:'fol',pr_p:'fel',es:'caer',t:'irregular'},
   {i:'grow',p:'grew',pp:'grown',pr_i:'groh',pr_p:'groo',es:'crecer',t:'irregular'},
   {i:'fly',p:'flew',pp:'flown',pr_i:'flai',pr_p:'floo',es:'volar',t:'irregular'},
-  {i:'drive',p:'drove',pp:'driven',pr_i:'draiv',pr_p:'drohv',es:'conducir',t:'irregular'},
+  {i:'drive',p:'drove',pp:'driven',pr_i:'draiv',pr_p:'drohv',es:'conducir/manejar',t:'irregular'},
   {i:'win',p:'won',pp:'won',pr_i:'win',pr_p:'wun',es:'ganar',t:'irregular'},
-  {i:'understand',p:'understood',pp:'understood',pr_i:'un-der-STAND',pr_p:'un-der-STUD',es:'entender',t:'irregular'},
+  {i:'understand',p:'understood',pp:'understood',pr_i:'un-der-STAND',pr_p:'un-der-STUD',es:'entender/comprender',t:'irregular'},
   {i:'forget',p:'forgot',pp:'forgotten',pr_i:'fer-GET',pr_p:'fer-GOT',es:'olvidar',t:'irregular'},
-  {i:'choose',p:'chose',pp:'chosen',pr_i:'chooz',pr_p:'chohz',es:'elegir',t:'irregular'},
+  {i:'choose',p:'chose',pp:'chosen',pr_i:'chooz',pr_p:'chohz',es:'elegir/escoger',t:'irregular'},
   {i:'swim',p:'swam',pp:'swum',pr_i:'swim',pr_p:'swam',es:'nadar',t:'irregular'},
-  {i:'wear',p:'wore',pp:'worn',pr_i:'wer',pr_p:'wor',es:'llevar puesto',t:'irregular'},
+  {i:'wear',p:'wore',pp:'worn',pr_i:'wer',pr_p:'wor',es:'llevar puesto/usar',t:'irregular'},
   {i:'read',p:'read',pp:'read',pr_i:'reed',pr_p:'red',es:'leer',t:'irregular'},
-  {i:'stand',p:'stood',pp:'stood',pr_i:'stand',pr_p:'stud',es:'estar de pie',t:'irregular'},
-  {i:'hold',p:'held',pp:'held',pr_i:'hohld',pr_p:'held',es:'sostener',t:'irregular'},
+  {i:'stand',p:'stood',pp:'stood',pr_i:'stand',pr_p:'stud',es:'estar de pie/aguantar',t:'irregular'},
+  {i:'hold',p:'held',pp:'held',pr_i:'hohld',pr_p:'held',es:'sostener/aguantar',t:'irregular'},
   {i:'spend',p:'spent',pp:'spent',pr_i:'spend',pr_p:'spent',es:'gastar/pasar tiempo',t:'irregular'},
   {i:'meet',p:'met',pp:'met',pr_i:'meet',pr_p:'met',es:'conocer/reunirse',t:'irregular'},
   {i:'build',p:'built',pp:'built',pr_i:'bild',pr_p:'bilt',es:'construir',t:'irregular'},
   {i:'cut',p:'cut',pp:'cut',pr_i:'kut',pr_p:'kut',es:'cortar',t:'irregular'},
   {i:'put',p:'put',pp:'put',pr_i:'put',pr_p:'put',es:'poner',t:'irregular'},
-  {i:'hit',p:'hit',pp:'hit',pr_i:'hit',pr_p:'hit',es:'golpear',t:'irregular'},
+  {i:'hit',p:'hit',pp:'hit',pr_i:'hit',pr_p:'hit',es:'golpear/pegar',t:'irregular'},
   {i:'hurt',p:'hurt',pp:'hurt',pr_i:'hurt',pr_p:'hurt',es:'doler/herir',t:'irregular'},
   {i:'let',p:'let',pp:'let',pr_i:'let',pr_p:'let',es:'dejar/permitir',t:'irregular'},
-  {i:'set',p:'set',pp:'set',pr_i:'set',pr_p:'set',es:'establecer',t:'irregular'},
-  {i:'throw',p:'threw',pp:'thrown',pr_i:'throh',pr_p:'throo',es:'lanzar',t:'irregular'},
+  {i:'set',p:'set',pp:'set',pr_i:'set',pr_p:'set',es:'establecer/poner',t:'irregular'},
+  {i:'throw',p:'threw',pp:'thrown',pr_i:'throh',pr_p:'throo',es:'lanzar/tirar',t:'irregular'},
   {i:'draw',p:'drew',pp:'drawn',pr_i:'dro',pr_p:'droo',es:'dibujar',t:'irregular'},
-  {i:'hide',p:'hid',pp:'hidden',pr_i:'haid',pr_p:'hid',es:'esconder',t:'irregular'},
+  {i:'hide',p:'hid',pp:'hidden',pr_i:'haid',pr_p:'hid',es:'esconder/ocultarse',t:'irregular'},
   {i:'bite',p:'bit',pp:'bitten',pr_i:'bait',pr_p:'bit',es:'morder',t:'irregular'},
   {i:'steal',p:'stole',pp:'stolen',pr_i:'steel',pr_p:'stohl',es:'robar',t:'irregular'},
-  {i:'shake',p:'shook',pp:'shaken',pr_i:'shayk',pr_p:'shuk',es:'sacudir',t:'irregular'},
+  {i:'shake',p:'shook',pp:'shaken',pr_i:'shayk',pr_p:'shuk',es:'sacudir/temblar',t:'irregular'},
   {i:'wake',p:'woke',pp:'woken',pr_i:'wayk',pr_p:'wohk',es:'despertar',t:'irregular'},
   {i:'forgive',p:'forgave',pp:'forgiven',pr_i:'fer-GIV',pr_p:'fer-GAYV',es:'perdonar',t:'irregular'},
   {i:'overcome',p:'overcame',pp:'overcome',pr_i:'oh-ver-KUM',pr_p:'oh-ver-KAYM',es:'superar',t:'irregular'},
@@ -240,56 +743,55 @@ const B=[
   {i:'work',p:'worked',pp:'worked',pr_i:'wurk',pr_p:'wurkt',es:'trabajar',t:'regular'},
   {i:'play',p:'played',pp:'played',pr_i:'play',pr_p:'playd',es:'jugar/tocar',t:'regular'},
   {i:'walk',p:'walked',pp:'walked',pr_i:'wok',pr_p:'wokt',es:'caminar',t:'regular'},
-  {i:'talk',p:'talked',pp:'talked',pr_i:'tok',pr_p:'tokt',es:'charlar',t:'regular'},
-  {i:'watch',p:'watched',pp:'watched',pr_i:'woch',pr_p:'wocht',es:'mirar',t:'regular'},
+  {i:'talk',p:'talked',pp:'talked',pr_i:'tok',pr_p:'tokt',es:'charlar/hablar',t:'regular'},
+  {i:'watch',p:'watched',pp:'watched',pr_i:'woch',pr_p:'wocht',es:'mirar/ver',t:'regular'},
   {i:'listen',p:'listened',pp:'listened',pr_i:'LIS-en',pr_p:'LIS-end',es:'escuchar',t:'regular'},
   {i:'open',p:'opened',pp:'opened',pr_i:'OH-pen',pr_p:'OH-pend',es:'abrir',t:'regular'},
   {i:'close',p:'closed',pp:'closed',pr_i:'klohz',pr_p:'klohzd',es:'cerrar',t:'regular'},
-  {i:'start',p:'started',pp:'started',pr_i:'start',pr_p:'star-ted',es:'empezar',t:'regular'},
+  {i:'start',p:'started',pp:'started',pr_i:'start',pr_p:'star-ted',es:'empezar/arrancar',t:'regular'},
   {i:'finish',p:'finished',pp:'finished',pr_i:'FIN-ish',pr_p:'FIN-isht',es:'terminar',t:'regular'},
-  {i:'love',p:'loved',pp:'loved',pr_i:'luv',pr_p:'luvd',es:'amar',t:'regular'},
+  {i:'love',p:'loved',pp:'loved',pr_i:'luv',pr_p:'luvd',es:'amar/querer',t:'regular'},
   {i:'help',p:'helped',pp:'helped',pr_i:'help',pr_p:'helpt',es:'ayudar',t:'regular'},
   {i:'cook',p:'cooked',pp:'cooked',pr_i:'kuk',pr_p:'kukt',es:'cocinar',t:'regular'},
   {i:'clean',p:'cleaned',pp:'cleaned',pr_i:'kleen',pr_p:'kleend',es:'limpiar',t:'regular'},
   {i:'call',p:'called',pp:'called',pr_i:'kol',pr_p:'kold',es:'llamar',t:'regular'},
-  {i:'ask',p:'asked',pp:'asked',pr_i:'ask',pr_p:'askt',es:'preguntar',t:'regular'},
-  {i:'try',p:'tried',pp:'tried',pr_i:'trai',pr_p:'traid',es:'intentar',t:'regular'},
-  {i:'stop',p:'stopped',pp:'stopped',pr_i:'stop',pr_p:'stopt',es:'parar',t:'regular'},
-  {i:'move',p:'moved',pp:'moved',pr_i:'muv',pr_p:'muvd',es:'moverse',t:'regular'},
+  {i:'ask',p:'asked',pp:'asked',pr_i:'ask',pr_p:'askt',es:'preguntar/pedir',t:'regular'},
+  {i:'try',p:'tried',pp:'tried',pr_i:'trai',pr_p:'traid',es:'intentar/probar',t:'regular'},
+  {i:'stop',p:'stopped',pp:'stopped',pr_i:'stop',pr_p:'stopt',es:'parar/dejar de',t:'regular'},
+  {i:'move',p:'moved',pp:'moved',pr_i:'muv',pr_p:'muvd',es:'mover/mudarse',t:'regular'},
   {i:'wait',p:'waited',pp:'waited',pr_i:'wayt',pr_p:'WAY-ted',es:'esperar',t:'regular'},
   {i:'learn',p:'learned',pp:'learned',pr_i:'lurn',pr_p:'lurnd',es:'aprender',t:'regular'},
   {i:'study',p:'studied',pp:'studied',pr_i:'STUD-ee',pr_p:'STUD-eed',es:'estudiar',t:'regular'},
   {i:'travel',p:'traveled',pp:'traveled',pr_i:'TRAV-ul',pr_p:'TRAV-uld',es:'viajar',t:'regular'},
   {i:'need',p:'needed',pp:'needed',pr_i:'need',pr_p:'NEE-ded',es:'necesitar',t:'regular'},
-  {i:'want',p:'wanted',pp:'wanted',pr_i:'wont',pr_p:'WON-ted',es:'querer',t:'regular'},
+  {i:'want',p:'wanted',pp:'wanted',pr_i:'wont',pr_p:'WON-ted',es:'querer/desear',t:'regular'},
   {i:'like',p:'liked',pp:'liked',pr_i:'laik',pr_p:'laikt',es:'gustar',t:'regular'},
   {i:'decide',p:'decided',pp:'decided',pr_i:'dih-SAID',pr_p:'dih-SAI-ded',es:'decidir',t:'regular'},
   {i:'change',p:'changed',pp:'changed',pr_i:'chaynj',pr_p:'chayjnd',es:'cambiar',t:'regular'},
   {i:'live',p:'lived',pp:'lived',pr_i:'liv',pr_p:'livd',es:'vivir',t:'regular'},
   {i:'smile',p:'smiled',pp:'smiled',pr_i:'smail',pr_p:'smaild',es:'sonreír',t:'regular'},
-  {i:'laugh',p:'laughed',pp:'laughed',pr_i:'laf',pr_p:'laft',es:'reír',t:'regular'},
+  {i:'laugh',p:'laughed',pp:'laughed',pr_i:'laf',pr_p:'laft',es:'reír/reírse',t:'regular'},
   {i:'cry',p:'cried',pp:'cried',pr_i:'krai',pr_p:'kraid',es:'llorar',t:'regular'},
   {i:'dance',p:'danced',pp:'danced',pr_i:'dans',pr_p:'danst',es:'bailar',t:'regular'},
-  {i:'achieve',p:'achieved',pp:'achieved',pr_i:'uh-CHEEV',pr_p:'uh-CHEEVD',es:'lograr',t:'regular'},
+  {i:'achieve',p:'achieved',pp:'achieved',pr_i:'uh-CHEEV',pr_p:'uh-CHEEVD',es:'lograr/alcanzar',t:'regular'},
   {i:'improve',p:'improved',pp:'improved',pr_i:'im-PRUV',pr_p:'im-PRUVD',es:'mejorar',t:'regular'},
   {i:'suggest',p:'suggested',pp:'suggested',pr_i:'suh-JEST',pr_p:'suh-JES-ted',es:'sugerir',t:'regular'},
   {i:'manage',p:'managed',pp:'managed',pr_i:'MAN-ij',pr_p:'MAN-ijd',es:'gestionar/lograr',t:'regular'},
-  {i:'argue',p:'argued',pp:'argued',pr_i:'AR-gyoo',pr_p:'AR-gyood',es:'discutir',t:'regular'},
+  {i:'argue',p:'argued',pp:'argued',pr_i:'AR-gyoo',pr_p:'AR-gyood',es:'discutir/argumentar',t:'regular'},
 ];
 
-const MILESTONES=[5,10,15,20,30,50];
-const MSGS={5:'Buena racha!',10:'10 seguidas!',15:'Imparable!',20:'20 seguidas!!',30:'30 en racha!!!',50:'Increible, 50!!'};
-const COLORS=['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff922b','#cc5de8'];
-
+// ── STATE ────────────────────────────────────────────────────
 const cats=['Todas',...new Set(V.map(w=>w.c))];
-let selCat='Todas',vMode='en';
-let vQ=[],vRev=[],vC=0,vW=0,vStr=0,vTot=0,vCur=null,vShowing=false;
-let bType='all',bTense='past';
-let bQ=[],bRev=[],bC=0,bW=0,bStr=0,bTot=0,bCur=null,bShowing=false;
-let curSpeakV='',curSpeakB='';
+let section='vocab', selCat='Todas', vMode='en';
+let bType='all', bTense='past';
+let queue=[], review=[], correct=0, wrong=0, streak=0, total=0;
+let current=null, showing=false, revealed=false;
+let learnedSet=new Set(); // words answered correctly at least once
 
+// ── HELPERS ──────────────────────────────────────────────────
 function shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function norm(s){return s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function $(id){return document.getElementById(id)}
 
 function speak(text){
   if(!window.speechSynthesis)return;
@@ -298,194 +800,205 @@ function speak(text){
   u.lang='en-US';u.rate=0.85;
   window.speechSynthesis.speak(u);
 }
-function speakWord(){speak(curSpeakV)}
-function speakVerb(){speak(curSpeakB)}
-
-function celebrate(streak){
-  if(!MILESTONES.includes(streak))return;
-  const cel=document.getElementById('celebration');
-  const msg=document.getElementById('cel-msg');
-  const wrap=document.getElementById('confetti-wrap');
-  msg.textContent=MSGS[streak]||streak+' seguidas!';
-  wrap.innerHTML='';
-  for(let i=0;i<40;i++){
-    const d=document.createElement('div');
-    d.className='dot';
-    d.style.cssText=`left:${Math.random()*100}%;top:-10px;background:${COLORS[Math.floor(Math.random()*COLORS.length)]};animation-duration:${0.8+Math.random()*1.2}s;animation-delay:${Math.random()*0.4}s`;
-    wrap.appendChild(d);
-  }
-  cel.className='show';
-  setTimeout(()=>{cel.className='hide';},2200);
+function doSpeak(){
+  if(!current)return;
+  const word=section==='vocab'?current.en:current.i;
+  speak(word);
 }
 
+// ── MENU TOGGLE ──────────────────────────────────────────────
+function toggleMenu(){
+  const p=$('menu-panel');
+  const open=p.classList.contains('open');
+  p.classList.toggle('open',!open);
+  $('menu-btn-label').textContent=open?'Opciones':'Cerrar';
+}
+
+// ── CONFETTI ─────────────────────────────────────────────────
+const COLORS=['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff922b','#cc5de8','#f06595'];
+function celebrate(){
+  const wrap=$('confetti-wrap');
+  wrap.innerHTML='';
+  for(let i=0;i<55;i++){
+    const d=document.createElement('div');
+    d.className='dot';
+    const size=6+Math.random()*8;
+    d.style.cssText=`left:${Math.random()*100}%;top:-10px;width:${size}px;height:${size}px;background:${COLORS[Math.floor(Math.random()*COLORS.length)]};animation-duration:${0.9+Math.random()*1.3}s;animation-delay:${Math.random()*0.5}s`;
+    wrap.appendChild(d);
+  }
+  setTimeout(()=>wrap.innerHTML='',2800);
+}
+
+// ── VERB RULE ─────────────────────────────────────────────────
+function updateRule(){
+  $('rule-box').innerHTML=RULES[bTense]||'';
+}
+
+// ── POOL BUILDERS ─────────────────────────────────────────────
+function getVocabPool(){return selCat==='Todas'?V:V.filter(w=>w.c===selCat)}
+function getVerbPool(){return bType==='all'?B:B.filter(v=>v.t===bType)}
+
+// ── INIT ──────────────────────────────────────────────────────
+function initSession(){
+  const pool=section==='vocab'?getVocabPool():getVerbPool();
+  queue=shuf([...pool]);review=[];correct=0;wrong=0;streak=0;total=queue.length;
+  updStats();next();
+}
+
+// ── NEXT CARD ─────────────────────────────────────────────────
+function next(){
+  $('main-card').className='card';
+  $('c-res').innerHTML='';
+  $('c-revealed').innerHTML='';
+  revealed=false;
+
+  // Pull from review queue ~30% of the time if available
+  if(review.length>0&&(queue.length===0||Math.random()<0.3)){current=review.shift();}
+  else if(queue.length>0){current=queue.shift();if(review.length>0)shuf(review);}
+  else{
+    current=null;
+    $('c-word').textContent='Completado!';
+    $('c-badge').textContent='';$('c-cat').textContent='';
+    $('c-pron').textContent='';$('c-speak').style.display='none';
+    $('c-hint').textContent='Repasaste todas las palabras';
+    return;
+  }
+
+  if(section==='vocab'){
+    const isEN=vMode==='en';
+    $('c-badge').textContent=isEN?'ingles':'espanol';
+    $('c-cat').textContent=current.c;
+    $('c-word').textContent=isEN?current.en:current.es[0];
+    $('c-pron').textContent=isEN?'/'+current.pr+'/':'';
+    $('c-speak').style.display=isEN?'inline-flex':'none';
+    $('c-hint').textContent=isEN?'Como se dice en espanol?':'Como se dice en ingles?';
+  } else {
+    let prompt,pron,hint;
+    if(bTense==='past'){prompt=current.i;pron='/'+current.pr_i+'/';hint='Pasado de "'+current.i+'" · '+current.es;}
+    else if(bTense==='pp'){prompt=current.i;pron='/'+current.pr_i+'/';hint='Participio de "'+current.i+'" · '+current.es;}
+    else{prompt=current.p;pron='/'+current.pr_p+'/';hint='Infinitivo · pasado: '+current.p+' · '+current.es;}
+    $('c-badge').textContent=current.t;
+    $('c-cat').textContent='';
+    $('c-word').textContent=prompt;
+    $('c-pron').textContent=pron;
+    $('c-speak').style.display='inline-flex';
+    $('c-hint').textContent=hint;
+  }
+  $('main-in').value='';
+  $('main-in').focus();
+  showing=false;updStats();
+}
+
+// ── CHECK ─────────────────────────────────────────────────────
+function checkAnswer(){
+  if(showing){next();return;}
+  if(revealed){
+    // after "no lo sé" — mark as wrong, re-queue
+    wrong++;streak=0;review.push(current);
+    $('main-card').className='card wrong';
+    $('c-res').innerHTML='<span class="result no">Seguir practicando</span>';
+    updStats();showing=true;setTimeout(next,2000);return;
+  }
+  const inp=$('main-in').value;
+  if(!inp.trim()||!current)return;
+  let ok=false;
+  if(section==='vocab'){
+    const alts=vMode==='en'?current.es:[current.en];
+    ok=alts.some(a=>norm(inp)===norm(a));
+  } else {
+    let exp=bTense==='past'?current.p:bTense==='pp'?current.pp:current.i;
+    ok=exp.split('/').some(a=>norm(inp)===norm(a));
+  }
+  if(ok){
+    correct++;streak++;
+    // Mark as learned (answered correctly at least once)
+    const key=section==='vocab'?current.en:current.i;
+    learnedSet.add(key);
+    $('main-card').className='card correct';
+    $('c-res').innerHTML='<span class="result ok">Correcto</span>';
+    if(streak%5===0)celebrate();
+  } else {
+    wrong++;streak=0;review.push(current);
+    $('main-card').className='card wrong';
+    const exp=section==='vocab'?(vMode==='en'?current.es.join(' / '):current.en):(bTense==='past'?current.p:bTense==='pp'?current.pp:current.i);
+    $('c-res').innerHTML=`<span class="result no">Era: ${exp}</span>`;
+  }
+  updStats();showing=true;setTimeout(next,2500);
+}
+
+// ── DON'T KNOW ───────────────────────────────────────────────
+function dontKnow(){
+  if(showing||!current)return;
+  revealed=true;
+  $('main-card').className='card revealed';
+  let answer='';
+  if(section==='vocab'){
+    answer=vMode==='en'?current.es.join(' / '):current.en;
+  } else {
+    if(bTense==='past')answer=current.p;
+    else if(bTense==='pp')answer=current.pp;
+    else answer=current.i;
+  }
+  $('c-revealed').innerHTML=`<div class="revealed-word">${answer}</div>`;
+  $('c-hint').textContent='Memoriza la palabra y toca OK';
+  $('main-in').value='';
+}
+
+function doSkip(){if(!current||showing)return;review.push(current);next();}
+
+// ── STATS ─────────────────────────────────────────────────────
+function updStats(){
+  $('s-c').textContent=correct;
+  $('s-w').textContent=wrong;
+  $('s-r').textContent=queue.length+review.length;
+  $('s-s').textContent=streak;
+  const pct=total>0?Math.round(correct/total*100):0;
+  $('prog').style.width=pct+'%';
+  $('learned-badge').textContent=learnedSet.size+' aprendidas';
+  $('streak-wrap').innerHTML=streak>=5?`<span class="streak">Racha de ${streak}</span>`:'';
+}
+
+// ── CAT BUTTONS ───────────────────────────────────────────────
 function buildCats(){
-  document.getElementById('cat-btns').innerHTML=cats.map(c=>
+  $('cat-btns').innerHTML=cats.map(c=>
     `<button class="pill${c===selCat?' active':''}" onclick="setCat('${c.replace(/'/g,"\\'")}')">${c}</button>`
   ).join('');
 }
-function setCat(c){selCat=c;buildCats();initV()}
-function getPool(){return selCat==='Todas'?V:V.filter(w=>w.c===selCat)}
-
-function initV(){
-  vQ=shuf([...getPool()]);vRev=[];vC=0;vW=0;vStr=0;vTot=vQ.length;
-  updV();nextV();
-}
+function setCat(c){selCat=c;buildCats();initSession();}
 function setMode(m){
   vMode=m;
-  document.getElementById('mode-en').classList.toggle('active',m==='en');
-  document.getElementById('mode-es').classList.toggle('active',m==='es');
-  initV();
-}
-function nextV(){
-  document.getElementById('v-card').className='card';
-  if(vRev.length>0&&(vQ.length===0||Math.random()<0.3)){vCur=vRev.shift();}
-  else if(vQ.length>0){vCur=vQ.shift();if(vRev.length>0)shuf(vRev);}
-  else{
-    vCur=null;
-    document.getElementById('v-word').textContent='Completado!';
-    document.getElementById('v-badge').textContent='';
-    document.getElementById('v-cat').textContent='';
-    document.getElementById('v-pron').textContent='';
-    document.getElementById('v-speak').style.display='none';
-    document.getElementById('v-hint').textContent='Repasaste todas las palabras';
-    document.getElementById('v-res').innerHTML='';return;
-  }
-  const isEN=vMode==='en';
-  curSpeakV=vCur.en;
-  document.getElementById('v-badge').textContent=isEN?'ingles':'espanol';
-  document.getElementById('v-cat').textContent=vCur.c;
-  document.getElementById('v-word').textContent=isEN?vCur.en:vCur.es;
-  document.getElementById('v-pron').textContent=isEN?'/'+vCur.pr+'/':'';
-  document.getElementById('v-speak').style.display=isEN?'inline-flex':'none';
-  document.getElementById('v-hint').textContent=isEN?'Como se dice en espanol?':'Como se dice en ingles?';
-  document.getElementById('v-res').innerHTML='';
-  document.getElementById('v-in').value='';
-  document.getElementById('v-in').focus();
-  vShowing=false;updV();
-}
-function checkV(){
-  if(vShowing){nextV();return;}
-  const inp=document.getElementById('v-in').value;
-  if(!inp.trim()||!vCur)return;
-  const exp=vMode==='en'?vCur.es:vCur.en;
-  const alts=exp.split('/').map(norm);
-  const ok=alts.some(a=>norm(inp)===a);
-  const card=document.getElementById('v-card');
-  if(ok){
-    vC++;vStr++;
-    card.className='card correct';
-    document.getElementById('v-res').innerHTML='<span class="result ok">Correcto</span>';
-    celebrate(vStr);
-  } else {
-    vW++;vStr=0;vRev.push(vCur);
-    card.className='card wrong';
-    document.getElementById('v-res').innerHTML=`<span class="result no">Era: ${exp}</span>`;
-  }
-  updV();vShowing=true;
-  setTimeout(nextV,2500);
-}
-function skipV(){if(!vCur)return;vRev.push(vCur);nextV();}
-function updV(){
-  document.getElementById('v-c').textContent=vC;
-  document.getElementById('v-w').textContent=vW;
-  document.getElementById('v-r').textContent=vQ.length+vRev.length;
-  document.getElementById('v-prog').style.width=(vTot>0?Math.round(vC/vTot*100):0)+'%';
-  const sw=document.getElementById('streak-wrap');
-  sw.innerHTML=vStr>=3?`<span class="streak">Racha: ${vStr}</span>`:'';
-}
-
-function initB(){
-  const pool=bType==='all'?B:B.filter(v=>v.t===bType);
-  bQ=shuf([...pool]);bRev=[];bC=0;bW=0;bStr=0;bTot=bQ.length;
-  updB();nextB();
+  $('mode-en').classList.toggle('active',m==='en');
+  $('mode-es').classList.toggle('active',m==='es');
+  initSession();
 }
 function setVT(t){
   bType=t;
-  document.getElementById('vt-all').classList.toggle('active',t==='all');
-  document.getElementById('vt-reg').classList.toggle('active',t==='regular');
-  document.getElementById('vt-irr').classList.toggle('active',t==='irregular');
-  initB();
+  $('vt-all').classList.toggle('active',t==='all');
+  $('vt-reg').classList.toggle('active',t==='regular');
+  $('vt-irr').classList.toggle('active',t==='irregular');
+  initSession();
 }
 function setTense(t){
   bTense=t;
-  ['past','pp','inf'].forEach(x=>document.getElementById('tn-'+x).classList.toggle('active',x===t));
-  initB();
+  ['past','pp','inf'].forEach(x=>$('tn-'+x).classList.toggle('active',x===t));
+  updateRule();initSession();
 }
-function nextB(){
-  document.getElementById('b-card').className='card';
-  let v;
-  if(bRev.length>0&&(bQ.length===0||Math.random()<0.3)){v=bRev.shift();}
-  else if(bQ.length>0){v=bQ.shift();if(bRev.length>0)shuf(bRev);}
-  else{
-    bCur=null;
-    document.getElementById('b-word').textContent='Completado!';
-    document.getElementById('b-badge').textContent='';
-    document.getElementById('b-pron').textContent='';
-    document.getElementById('b-speak').style.display='none';
-    document.getElementById('b-hint').textContent='Repasaste todos los verbos';
-    document.getElementById('b-res').innerHTML='';return;
-  }
-  bCur=v;
-  let prompt,pron,hint,spk;
-  if(bTense==='past'){
-    prompt=v.i;pron='/'+v.pr_i+'/';spk=v.i;
-    hint='Pasado de "'+v.i+'" · '+v.es+' · '+(v.t==='irregular'?'irregular':'reg: -ed');
-  } else if(bTense==='pp'){
-    prompt=v.i;pron='/'+v.pr_i+'/';spk=v.i;
-    hint='Participio de "'+v.i+'" · '+v.es;
-  } else {
-    prompt=v.p;pron='/'+v.pr_p+'/';spk=v.p;
-    hint='Infinitivo · pasado: '+v.p+' · '+v.es;
-  }
-  curSpeakB=spk;
-  document.getElementById('b-badge').textContent=v.t;
-  document.getElementById('b-word').textContent=prompt;
-  document.getElementById('b-pron').textContent=pron;
-  document.getElementById('b-speak').style.display='inline-flex';
-  document.getElementById('b-hint').textContent=hint;
-  document.getElementById('b-res').innerHTML='';
-  document.getElementById('b-in').value='';
-  document.getElementById('b-in').focus();
-  bShowing=false;updB();
-}
-function checkB(){
-  if(bShowing){nextB();return;}
-  const inp=document.getElementById('b-in').value;
-  if(!inp.trim()||!bCur)return;
-  let exp=bTense==='past'?bCur.p:bTense==='pp'?bCur.pp:bCur.i;
-  const alts=exp.split('/').map(norm);
-  const ok=alts.some(a=>norm(inp)===a);
-  const card=document.getElementById('b-card');
-  if(ok){
-    bC++;bStr++;
-    card.className='card correct';
-    document.getElementById('b-res').innerHTML='<span class="result ok">Correcto</span>';
-    celebrate(bStr);
-  } else {
-    bW++;bStr=0;bRev.push(bCur);
-    card.className='card wrong';
-    document.getElementById('b-res').innerHTML=`<span class="result no">Era: ${exp}</span>`;
-  }
-  updB();bShowing=true;
-  setTimeout(nextB,2500);
-}
-function skipB(){if(!bCur)return;bRev.push(bCur);nextB();}
-function updB(){
-  document.getElementById('b-c').textContent=bC;
-  document.getElementById('b-w').textContent=bW;
-  document.getElementById('b-r').textContent=bQ.length+bRev.length;
-  document.getElementById('b-prog').style.width=(bTot>0?Math.round(bC/bTot*100):0)+'%';
-  document.getElementById('streak-wrap-b').innerHTML=bStr>=3?`<span class="streak">Racha: ${bStr}</span>`:'';
-}
+
+// ── SECTION SWITCH ────────────────────────────────────────────
 function switchSection(s){
-  document.getElementById('section-vocab').style.display=s==='vocab'?'':'none';
-  document.getElementById('section-verbs').style.display=s==='verbs'?'':'none';
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&s==='vocab')||(i===1&&s==='verbs')));
-  if(s==='verbs'&&bTot===0)initB();
+  section=s;
+  $('tab-vocab').classList.toggle('active',s==='vocab');
+  $('tab-verbs').classList.toggle('active',s==='verbs');
+  $('menu-vocab').style.display=s==='vocab'?'':'none';
+  $('menu-verbs').style.display=s==='verbs'?'':'none';
+  initSession();
 }
-document.getElementById('v-in').addEventListener('keydown',e=>{if(e.key==='Enter')checkV()});
-document.getElementById('b-in').addEventListener('keydown',e=>{if(e.key==='Enter')checkB()});
-buildCats();initV();
+
+// ── KEYBOARD ──────────────────────────────────────────────────
+$('main-in').addEventListener('keydown',e=>{if(e.key==='Enter')checkAnswer()});
+
+// ── BOOT ─────────────────────────────────────────────────────
+updateRule();buildCats();initSession();
 </script>
 </body>
 </html>
